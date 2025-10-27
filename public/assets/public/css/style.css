@@ -1,0 +1,13 @@
+.lista-custom {
+   list-style-type: disc;
+}
+
+/* DataTables overrides: ensure pagination and controls are visible */
+.dataTables_wrapper .dataTables_paginate li.paginate_button {
+  display: inline-block !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+  display: block !important;
+}
