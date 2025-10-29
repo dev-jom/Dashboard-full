@@ -25,6 +25,7 @@
     <link href="assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     
     <link href="assets/css/app-dark.min.css" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="assets/css/custom.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body data-topbar="dark" data-layout="horizontal">
@@ -146,15 +147,12 @@
                         </div>
                     </div> -->
 
-                    <div class="dropdown d-inline-block user-dropdown">
-                        <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="d-none d-xl-inline-block ml-1">Selecionar Dashboard</span>
-                            <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#">Profile</a>
-                        </div>
+                    
+                    
+                    <div class="d-none d-lg-inline-block">
+                        <a href="{{ route('dashboard.teste') }}" class="btn header-item noti-icon waves-effect d-flex align-items-center" title="Site" target="_blank" rel="noopener">
+                            <span class="d-none d-xl-inline-block ml-2">Ir para Dashboard de Testes</span>
+                        </a>
                     </div>
                     
                     <div class="dropdown d-none d-lg-inline-block">
@@ -164,11 +162,7 @@
                     </div>
 
                     <div class="dropdown d-none d-lg-inline-block">
-                        <button type="button" class="btn header-item noti-icon waves-effect d-flex align-items-center"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="ri-apps-2-line d-none d-xl-inline-block"></i>
-                            <span class="d-none d-xl-inline-block ml-2">Apps</span>
-                        </button>
+                       
 
                         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                             <div class="px-lg-2">
@@ -230,14 +224,6 @@
                         <div class="col-12">
                             <div class="page-title-box d-flex align-items-center justify-content-between">
                                 <h4 class="mb-0">Dashboard</h4>
-
-                                <div class="page-title-right">
-                                    <ol class="breadcrumb m-0">
-                                        <li class="breadcrumb-item"><a href="javascript: void(0);">Nazox</a></li>
-                                        <li class="breadcrumb-item active">Dashboard</li>
-                                    </ol>
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -360,7 +346,7 @@
                                         <div class="col-4">
                                             <div class="text-center mt-4">
                                                 <p class="mb-2 text-truncate"><i class="mdi mdi-circle text-info font-size-10 mr-1"></i> Gfrotas</p>
-                                                <h5>10 %</h5>
+                                                <h5>67.3 %</h5>
                                             </div>
                                         </div>
                                         <div class="col-4">

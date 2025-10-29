@@ -1,0 +1,7 @@
+/* PBMonitor custom overrides */
+
+/* Override Bootstrap's dropdown right rule that forces left:auto !important */
+.dropdown-menu-right {
+  left: 0 !important;      /* let Popper's translate3d work with a left origin */
+  right: 0 !important;  /* avoid forcing right alignment */
+}
