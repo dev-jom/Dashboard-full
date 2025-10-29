@@ -75,7 +75,7 @@
                                     <div class="media">
                                         <div class="media-body overflow-hidden">
                                             <p class="text-truncate font-size-14 mb-2"> Total de Tickets</p>
-                                            <h4 class="mb-0">147</h4>
+                                            <h4 id="total-tickets" class="mb-0">147</h4>
                                         </div>
                                         <div class="text-primary"><i class="ri-ticket-fill font-size-24"></i></div>
                                     </div>
@@ -192,6 +192,28 @@
     
 
     <div class="rightbar-overlay"></div>
+
+    <!-- Donut Chart Modal (used by dashboard_teste) -->
+    <div class="modal fade" id="donutModal" tabindex="-1" aria-labelledby="donutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Detalhes</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Projeto: <strong><span id="modalProject">-</span></strong></p>
+                    <p>Valor: <strong><span id="modalValue">0</span>%</strong></p>
+                    <div class="mt-3">
+                        <h6>Detalhes Adicionais:</h6>
+                        <p id="modalDetails">Clique em um segmento do gráfico para ver os detalhes.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="assets/libs/jquery/jquery.min.js"></script>
     <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
