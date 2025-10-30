@@ -195,21 +195,23 @@
 
     <!-- Donut Chart Modal (used by dashboard_teste) -->
     <div class="modal fade" id="donutModal" tabindex="-1" aria-labelledby="donutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Detalhes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <p>Projeto: <strong><span id="modalProject">-</span></strong></p>
-                    <p>Valor: <strong><span id="modalValue">0</span>%</strong></p>
-                    <div class="mt-3">
-                        <h6>Detalhes Adicionais:</h6>
-                        <p id="modalDetails">Clique em um segmento do gráfico para ver os detalhes.</p>
-                    </div>
+                <div class="modal-body text-center">
+                    <!-- small chart container -->
+                    <div id="donutModalChart" style="height:220px; max-width:360px; margin:0 auto"></div>
+
+                    <!-- summary lines -->
+                    <p class="mt-3">Status: <strong><span id="modalProject">-</span></strong></p>
+                    <p>Quantidade: <strong><span id="modalValue">0</span></strong></p>
+                    <p id="modalDetails" class="text-muted small">Clique em um segmento do gráfico para ver os detalhes.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
