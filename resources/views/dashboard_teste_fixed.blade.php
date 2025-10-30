@@ -45,6 +45,20 @@
                             Dashboard de Testes
                         </button>
                     </div>
+                    <!-- Sprint selector (Bootstrap dropdown to match site pattern) -->
+                    <div class="ml-3 mt-3 d-inline-block" style="min-width:260px;">
+                        <div class="col-sm-6">
+                            <div class="dropdown mt-0 mt-sm-0">
+                                <a href="#" id="sprintDropdownBtn" class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Todas as Sprints <i class="mdi mdi-chevron-down"></i>
+                                </a>
+
+                                <div class="dropdown-menu" id="sprintDropdownMenu">
+                                    <a class="dropdown-item" href="#" data-sprint="">Todas as Sprints</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="d-flex pr-2">

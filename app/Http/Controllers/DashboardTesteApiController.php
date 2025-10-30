@@ -13,8 +13,13 @@ class DashboardTesteApiController extends Controller
     public function statusDistribution(Request $request)
     {
         // Normaliza o campo 'resultado' para chaves canônicas
-        $rows = Test::select('resultado')
-            ->get()
+        $sprint = $request->query('sprint');
+        $query = Test::select('resultado');
+        if ($sprint) {
+            $query = $query->where('sprint', $sprint);
+        }
+
+        $rows = $query->get()
             ->map(function ($t) {
                 $val = trim((string) $t->resultado);
                 $low = mb_strtolower(self::removeAccents($val));
@@ -41,7 +46,10 @@ class DashboardTesteApiController extends Controller
     public function devActivitiesCount(Request $request)
     {
         // Normaliza nomes, ignora vazios e conta por dev
-        $all = Test::select('atribuido_a')->get();
+        $sprint = $request->query('sprint');
+        $query = Test::select('atribuido_a');
+        if ($sprint) { $query = $query->where('sprint', $sprint); }
+        $all = $query->get();
         $counts = [];
         foreach ($all as $row) {
             $nameRaw = (string) $row->atribuido_a;
@@ -71,7 +79,10 @@ class DashboardTesteApiController extends Controller
     public function structuresTestsCount(Request $request)
     {
         // Conta por "estrutura", dividindo registros com múltiplas estruturas (e.g. ["PMS","CÂMARAS"]) e normalizando
-        $all = Test::select('estrutura')->get();
+        $sprint = $request->query('sprint');
+        $query = Test::select('estrutura');
+        if ($sprint) { $query = $query->where('sprint', $sprint); }
+        $all = $query->get();
         $counts = [];
         foreach ($all as $row) {
             $raw = (string) $row->estrutura;
@@ -101,6 +112,21 @@ class DashboardTesteApiController extends Controller
             'series' => [[ 'data' => $data ]],
             'totalEstruturas' => count($categories),
         ]);
+    }
+
+    // GET /api/tests/sprints
+    public function sprints(Request $request)
+    {
+        // Retorna valores distintos da coluna sprint (não nulos) em ordem decrescente
+        $list = Test::whereNotNull('sprint')
+            ->distinct()
+            ->orderBy('sprint', 'desc')
+            ->pluck('sprint')
+            ->filter()
+            ->values()
+            ->all();
+
+        return response()->json([ 'sprints' => $list ]);
     }
 
     private static function removeAccents($str)
