@@ -129,6 +129,87 @@ class DashboardTesteApiController extends Controller
         return response()->json([ 'sprints' => $list ]);
     }
 
+    // GET /api/tests/by-status
+    // Returns list of tests matching a normalized status (e.g., Reprovado, Aprovado, Validado)
+    public function testsByStatus(Request $request)
+    {
+        $status = (string) $request->query('status', '');
+        $sprint = (string) $request->query('sprint', '');
+        if ($status === '') {
+            return response()->json([ 'tests' => [] ]);
+        }
+
+        // map canonical status to a simple filter
+        $low = mb_strtolower($status);
+        $query = Test::query();
+        if ($sprint) { $query->where('sprint', $sprint); }
+
+        if (strpos($low, 'aprov') !== false) {
+            $query->where('resultado', 'like', '%aprov%');
+        } elseif (strpos($low, 'valid') !== false) {
+            $query->where('resultado', 'like', '%valid%');
+        } elseif (strpos($low, 'reprov') !== false) {
+            $query->where('resultado', 'like', '%reprov%');
+        } else {
+            // fallback: try to match the raw status text anywhere
+            $query->where('resultado', 'like', '%'. $status .'%');
+        }
+
+        // select only the fields we need
+        $rows = $query->select('numero_ticket', 'resumo_tarefa', 'link_tarefa')->orderBy('numero_ticket','desc')->get();
+
+        // normalize output
+        $out = $rows->map(function($r){
+            return [
+                'numero_ticket' => $r->numero_ticket,
+                'resumo_tarefa' => (string) $r->resumo_tarefa,
+                'link_tarefa' => (string) $r->link_tarefa,
+            ];
+        })->all();
+
+        return response()->json([ 'tests' => $out ]);
+    }
+
+    // GET /api/tests/search
+    // Generic search by allowed fields: resultado, atribuido_a, estrutura
+    public function testsSearch(Request $request)
+    {
+        $field = (string) $request->query('field', '');
+        $value = (string) $request->query('value', '');
+        $sprint = (string) $request->query('sprint', '');
+
+        $allowed = ['resultado','atribuido_a','estrutura'];
+        if ($field === '' || $value === '' || !in_array($field, $allowed)) {
+            return response()->json([ 'tests' => [] ]);
+        }
+
+        $query = Test::query();
+        if ($sprint) { $query->where('sprint', $sprint); }
+
+        // For resultado, try substring matching (case-insensitive)
+        if ($field === 'resultado') {
+            $query->where($field, 'like', '%'.$value.'%');
+        } elseif ($field === 'estrutura') {
+            // estrutura may contain comma-separated or bracketed lists; match by LIKE
+            $query->where($field, 'like', '%'.$value.'%');
+        } else {
+            // atribuido_a exact-ish match: use LIKE to be permissive
+            $query->where($field, 'like', '%'.$value.'%');
+        }
+
+        $rows = $query->select('numero_ticket', 'resumo_tarefa', 'link_tarefa')->orderBy('numero_ticket','desc')->get();
+
+        $out = $rows->map(function($r){
+            return [
+                'numero_ticket' => $r->numero_ticket,
+                'resumo_tarefa' => (string) $r->resumo_tarefa,
+                'link_tarefa' => (string) $r->link_tarefa,
+            ];
+        })->all();
+
+        return response()->json([ 'tests' => $out ]);
+    }
+
     private static function removeAccents($str)
     {
         return iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);

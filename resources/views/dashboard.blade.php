@@ -27,6 +27,16 @@
     <link href="assets/css/app-dark.min.css" id="app-style" rel="stylesheet" type="text/css" />
     <link href="assets/css/custom.css" rel="stylesheet" type="text/css" />
 
+    <style>
+        /* Reserve space for donut chart to avoid layout jumps on render */
+        #donut-chart { min-height: 320px; display:flex; align-items:center; justify-content:center; }
+        /* Keep form area height to avoid small jumps when date inputs show */
+        #top-projects-form { min-height: 40px; }
+        /* Loading spinner shown while chart renders */
+        #donut-chart.loading::before { content: ''; width:36px; height:36px; border:4px solid rgba(255,255,255,0.08); border-top-color:#6c5ce7; border-radius:50%; display:block; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+
 </head>
 <body data-topbar="dark" data-layout="horizontal">
 
@@ -237,7 +247,7 @@
                                             <div class="media">
                                                 <div class="media-body overflow-hidden">
                                                     <p class="text-truncate font-size-14 mb-2">Projetos em andamento este mês</p>
-                                                    <h4 class="mb-0">3</h4>
+                                                    <h4 class="mb-0">{{ $projetosMes ?? 0 }}</h4>
                                                 </div>
                                                 <div class="text-primary">
                                                     <i class="ri-stack-line font-size-24"></i>
@@ -247,7 +257,19 @@
 
                                         <div class="card-body border-top py-3">
                                             <div class="text-truncate">
-                                                <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"> </i> 2.4% </span>
+                                                @if(isset($projetosMesChange))
+                                                    @if($projetosMesChange === 0 || $projetosMesChange == 0)
+                                                        <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"></i></span>
+                                                    @else
+                                                        @if($projetosMesIsUp)
+                                                            <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"> </i> {{ $projetosMesChange }}% </span>
+                                                        @else
+                                                            <span class="badge badge-soft-fail font-size-11" style="background-color: brown; color: white;"><i class="mdi mdi-menu-down"> </i> {{ $projetosMesChange }}% </span>
+                                                        @endif
+                                                    @endif
+                                                @else
+                                                    <span class="badge badge-soft-secondary font-size-11">--</span>
+                                                @endif
                                                 <span class="text-muted ml-2">Comparado ao mês anterior</span>
                                             </div>
                                         </div>
@@ -259,7 +281,7 @@
                                             <div class="media">
                                                 <div class="media-body overflow-hidden">
                                                     <p class="text-truncate font-size-14 mb-2">Total de projetos este ano</p>
-                                                    <h4 class="mb-0">7</h4>
+                                                    <h4 class="mb-0">{{ $projetosAno ?? 0 }}</h4>
                                                 </div>
                                                 <div class="text-primary">
                                                     <i class="ri-store-2-line font-size-24"></i>
@@ -268,7 +290,19 @@
                                         </div>
                                         <div class="card-body border-top py-3">
                                             <div class="text-truncate">
-                                                <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"> </i> 2.4% </span>
+                                                @if(isset($projetosAnoChange))
+                                                    @if($projetosAnoChange === 0 || $projetosAnoChange == 0)
+                                                        <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"></i></span>
+                                                    @else
+                                                        @if($projetosAnoIsUp)
+                                                            <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"> </i> {{ $projetosAnoChange }}% </span>
+                                                        @else
+                                                            <span class="badge badge-soft-fail font-size-11" style="background-color: brown; color: white;"><i class="mdi mdi-menu-down"> </i> {{ $projetosAnoChange }}% </span>
+                                                        @endif
+                                                    @endif
+                                                @else
+                                                    <span class="badge badge-soft-secondary font-size-11">--</span>
+                                                @endif
                                                 <span class="text-muted ml-2">Comparado ao ano anterior</span>
                                             </div>
                                         </div>
@@ -279,8 +313,8 @@
                                         <div class="card-body">
                                             <div class="media">
                                                 <div class="media-body overflow-hidden">
-                                                    <p class="text-truncate font-size-14 mb-2">Total de projetos esta sprint (Sprint 148)</p>
-                                                    <h4 class="mb-0">2</h4>
+                                                    <p class="text-truncate font-size-14 mb-2">Total de projetos esta sprint <small>({{ $sprintLabel ?? '—' }})</small></p>
+                                                    <h4 class="mb-0">{{ $projetosSprint ?? 0 }}</h4>
                                                 </div>
                                                 <div class="text-primary">
                                                     <i class="ri-briefcase-4-line font-size-24"></i>
@@ -289,7 +323,19 @@
                                         </div>
                                         <div class="card-body border-top py-3">
                                             <div class="text-truncate">
-                                                <span class="badge badge-soft-fail font-size-11" style="background-color: brown; color: white;"><i class="mdi mdi-menu-down"> </i> 2.4% </span>
+                                                @if(isset($projetosSprintChange))
+                                                    @if($projetosSprintChange === 0 || $projetosSprintChange == 0)
+                                                        <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"></i></span>
+                                                    @else
+                                                        @if($projetosSprintIsUp)
+                                                            <span class="badge badge-soft-success font-size-11"><i class="mdi mdi-menu-up"> </i> {{ $projetosSprintChange }}% </span>
+                                                        @else
+                                                            <span class="badge badge-soft-fail font-size-11" style="background-color: brown; color: white;"><i class="mdi mdi-menu-down"> </i> {{ $projetosSprintChange }}% </span>
+                                                        @endif
+                                                    @endif
+                                                @else
+                                                    <span class="badge badge-soft-secondary font-size-11">--</span>
+                                                @endif
                                                 <span class="text-muted ml-2">Comparado a Sprint anterior</span>
                                             </div>
                                         </div>
@@ -308,10 +354,11 @@
                                         </div>
                                     </div>
                                     
+                                
                                     <div class="col-xl-6">
                                         <div class="card">
                                             <div class="card-body">
-                                                <h4 class="card-title mb-4">Spline Area</h4>
+                                                <h4 class="card-title mb-4">Relação entre quantidade de tarefas Criadas e Validadas</h4>
                                                 <div id="spline_area" class="apex-charts" dir="ltr"></div>  
                                             </div>
                                         </div>
@@ -340,27 +387,38 @@
                                     </div>
                                     <h4 class="card-title mb-4">Projetos com mais atividades</h4>
 
+                                    <form id="top-projects-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
+                                        <label class="mr-2">Período:</label>
+                                        <select name="range" id="range-select" class="custom-select custom-select-sm mr-2">
+                                            <option value="month" {{ request('range','month')=='month' ? 'selected' : '' }}>Este mês</option>
+                                            <option value="year" {{ request('range')=='year' ? 'selected' : '' }}>Este ano</option>
+                                            <option value="custom" {{ request('range')=='custom' ? 'selected' : '' }}>Personalizado</option>
+                                        </select>
+                                        <input type="date" name="start" id="start-date" class="form-control form-control-sm mr-2" value="{{ request('start') }}" style="display: none;">
+                                        <input type="date" name="end" id="end-date" class="form-control form-control-sm mr-2" value="{{ request('end') }}" style="display: none;">
+                                        <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                    </form>
+
                                     <div id="donut-chart" class="apex-charts"></div>
 
                                     <div class="row">
-                                        <div class="col-4">
-                                            <div class="text-center mt-4">
-                                                <p class="mb-2 text-truncate"><i class="mdi mdi-circle text-info font-size-10 mr-1"></i> Gfrotas</p>
-                                                <h5>67.3 %</h5>
+                                        @php
+                                            $labels = $topProjectsLabels ?? [];
+                                            $percents = $topProjectsPercentages ?? [];
+                                        @endphp
+                                        @for ($i = 0; $i < 3; $i++)
+                                            @php
+                                                $label = $labels[$i] ?? null;
+                                                $pct = $percents[$i] ?? null;
+                                                $dotClass = ['text-info', 'text-danger', 'text-warning'][$i] ?? 'text-primary';
+                                            @endphp
+                                            <div class="col-4">
+                                                <div class="text-center mt-4">
+                                                    <p class="mb-2 text-truncate"><i class="mdi mdi-circle {{ $dotClass }} font-size-10 mr-1"></i> {{ $label ?? '-' }}</p>
+                                                    <h5>{{ isset($pct) ? $pct . ' %' : '-' }}</h5>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="text-center mt-4">
-                                                <p class="mb-2 text-truncate"><i class="mdi mdi-circle text-danger font-size-10 mr-1"></i> Tecvoto </p>
-                                                <h5>65 %</h5>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="text-center mt-4">
-                                                <p class="mb-2 text-truncate"><i class="mdi mdi-circle text-warning font-size-10 mr-1"></i> Public </p>
-                                                <h5>25 %</h5>
-                                            </div>
-                                        </div>
+                                        @endfor
                                     </div>
                                 </div>
                             </div>
@@ -790,6 +848,30 @@
     <script src="assets/libs/node-waves/waves.min.js"></script>
 
     <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
+    <script>
+        // Toggle custom date inputs
+        (function(){
+            var range = document.getElementById('range-select');
+            var start = document.getElementById('start-date');
+            var end = document.getElementById('end-date');
+            function toggle() {
+                if (!range) return;
+                if (range.value === 'custom') { start.style.display = 'inline-block'; end.style.display = 'inline-block'; }
+                else { start.style.display = 'none'; end.style.display = 'none'; }
+            }
+            if (range) { range.addEventListener('change', toggle); toggle(); }
+        })();
+
+        // Donut chart is initialized by `assets/js/pages/dashboard.init.js`
+    </script>
+
+    {{-- Inject server-side top projects arrays for dashboard.init.js to consume --}}
+    <script>
+        window.topProjectsLabels = @json($topProjectsLabels ?? []);
+        window.topProjectsCounts = @json($topProjectsCounts ?? []);
+        window.topProjectsPercentages = @json($topProjectsPercentages ?? []);
+        window.periodLabel = @json($periodLabel ?? null);
+    </script>
 
     <script src="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
     <script src="assets/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-us-merc-en.js"></script>

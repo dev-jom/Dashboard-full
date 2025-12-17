@@ -50,33 +50,8 @@ var donutOptionsTeste = {
         }
         count = Number(count) || 0;
 
-        var modalElement = document.getElementById('donutModal');
-        if (modalElement) {
-          var title = document.getElementById('modalTitle');
-          if (title) title.textContent = 'Detalhes do Status';
-
-          var combined = statusName + ' ' + count + ' (' + Number(percent).toFixed(1) + ' %)';
-          var detailsText = 'Status Quantidade de Tarefas com esse status (Porcentagem equivalente)';
-
-          var modalBody = modalElement.querySelector('.modal-body');
-          if (modalBody) {
-            var modalProjectEl = modalElement.querySelector('#modalProject') || modalBody.querySelector('#modalProject');
-            var modalValueEl = modalElement.querySelector('#modalValue') || modalBody.querySelector('#modalValue');
-            var modalDetailsEl = modalElement.querySelector('#modalDetails') || modalBody.querySelector('#modalDetails');
-
-            if (modalProjectEl || modalValueEl || modalDetailsEl) {
-              if (modalProjectEl) modalProjectEl.textContent = statusName;
-              if (modalValueEl) modalValueEl.textContent = count + ' (' + Number(percent).toFixed(1) + ' %)';
-              if (modalDetailsEl) modalDetailsEl.textContent = detailsText;
-            } else {
-              modalBody.innerHTML = '<p class="h5 text-center"><strong>' + combined + '</strong></p>' +
-                '<p class="mt-3 text-muted text-center">' + detailsText + '</p>';
-            }
-          }
-
-          var modal = new bootstrap.Modal(modalElement);
-          modal.show();
-        }
+        // use the generic modal helper so behavior is consistent across charts
+        showTestsModal('Tickets - ' + statusName, 'resultado', statusName);
       }
     }
   },
@@ -173,38 +148,40 @@ var qntdAttDevsOptions = {
         height: 482,
         toolbar: { show: false },
         events: {
-            dataPointSelection: function(event, chartContext, config) {
-                var categories = ['Caio Andrade', 'Davi Andrade', 'Franklin', 'Jeff', 'Kayo', 'Max', 'Milene', 'Moab', 'Murillo', 'Newton'];
-                var seriesNames = qntdAttDevsOptions.series.map(function(s){ return s.name; });
-                var sprint = categories[config.dataPointIndex];
-                var serie = seriesNames[config.seriesIndex];
+      dataPointSelection: function(event, chartContext, config) {
+        var seriesNames = qntdAttDevsOptions.series.map(function(s){ return s.name; });
+        var serie = seriesNames[config.seriesIndex];
 
-                // Valor bruto
-                var rawvalue = qntdAttDevsOptions.series[config.seriesIndex].data[config.dataPointIndex];
-                var value = Math.round(Number(rawvalue)) || 0;
+        // Valor bruto
+        var rawvalue = qntdAttDevsOptions.series[config.seriesIndex].data[config.dataPointIndex];
+        var value = Math.round(Number(rawvalue)) || 0;
 
-                // Função de Calcular porcentagem relacionada a Quantidade de tickets proporcional a qntd de atts por dev
-                var totalTickets =  (typeof donutTotalTickets !== 'undefined') ? Number(donutTotalTickets) : 0;
-                var percent = totalTickets ? ((value / totalTickets) * 100).toFixed(1) : '0.0';
+        // Função de Calcular porcentagem relacionada a Quantidade de tickets proporcional a qntd de atts por dev
+        var totalTickets =  (typeof donutTotalTickets !== 'undefined') ? Number(donutTotalTickets) : 0;
+        var percent = totalTickets ? ((value / totalTickets) * 100).toFixed(1) : '0.0';
 
-                var modalElement = document.getElementById('financialModal');
-                if (modalElement) {
-                    var typeEl = document.getElementById('financialType');
-                    var monthEl = document.getElementById('financialMonth');
-                    var valueEl = document.getElementById('financialValue');
-                    var detailsEl = document.getElementById('financialDetails');
-                    if (typeEl) typeEl.textContent = serie;
-                    if (monthEl) monthEl.textContent = sprint;
+        // try to read the real category (dev name) from chart context or chart instance
+        var devName = '';
+        try {
+          if (chartContext && chartContext.w && chartContext.w.config && chartContext.w.config.xaxis && Array.isArray(chartContext.w.config.xaxis.categories)) {
+            devName = chartContext.w.config.xaxis.categories[config.dataPointIndex] || '';
+          }
+        } catch(e) { devName = ''; }
+        if (!devName && typeof qntdAttDevsChart !== 'undefined' && qntdAttDevsChart && qntdAttDevsChart.w && qntdAttDevsChart.w.config && qntdAttDevsChart.w.config.xaxis) {
+          var cats = qntdAttDevsChart.w.config.xaxis.categories || [];
+          devName = cats[config.dataPointIndex] || '';
+        }
 
-                    // Função para mostrar | Quantidade: vlr (%) |
+        if (!devName) {
+          // fallback to static list if present
+          var fallback = ['Caio Andrade', 'Davi Andrade', 'Franklin', 'Jeff', 'Kayo', 'Max', 'Milene', 'Moab', 'Murillo', 'Newton'];
+          devName = fallback[config.dataPointIndex] || '';
+        }
 
-                    if (valueEl) valueEl.textContent = value + ' (' + percent + '%)';
-                    // show only the primary quantity line — avoid repeating the same numbers in details
-                    if (detailsEl) detailsEl.textContent = '';
-                    var modal = new bootstrap.Modal(modalElement);
-                    modal.show();
-                }
-            }
+        if (devName) {
+          showTestsModal('Tickets - ' + devName, 'atribuido_a', devName);
+        }
+      }
         }
     },
   tooltip: {
@@ -262,6 +239,24 @@ var testesPorEstruturaOptions = {
         height: 800,
         type: 'bar',
         toolbar: { show: false }
+    ,
+    events: {
+      dataPointSelection: function(event, chartContext, config) {
+        try {
+          var cat = '';
+          if (chartContext && chartContext.w && chartContext.w.config && chartContext.w.config.xaxis && Array.isArray(chartContext.w.config.xaxis.categories)) {
+            cat = chartContext.w.config.xaxis.categories[config.dataPointIndex] || '';
+          }
+        } catch(e) { var cat = ''; }
+        if (!cat && typeof testesPorEstrutura !== 'undefined' && testesPorEstrutura && testesPorEstrutura.w && testesPorEstrutura.w.config && testesPorEstrutura.w.config.xaxis) {
+          var cats = testesPorEstrutura.w.config.xaxis.categories || [];
+          cat = cats[config.dataPointIndex] || '';
+        }
+        if (cat) {
+          showTestsModal('Tickets - ' + cat, 'estrutura', cat);
+        }
+      }
+    }
     },
     plotOptions: {
         bar: { horizontal: true }
@@ -323,6 +318,92 @@ function loadAllCharts() {
   loadStatusDistribution();
   loadDevActivities();
   loadStructuresCount();
+}
+
+// Generic helper to open the system modal and load tests for a given field/value
+function showTestsModal(titleText, field, value) {
+  var modalElement = document.getElementById('donutModal');
+  if (!modalElement) return;
+  var title = document.getElementById('modalTitle');
+  if (title) title.textContent = titleText;
+  var modalBody = modalElement.querySelector('.modal-body');
+  // create and show modal immediately, then populate it asynchronously
+  var modal = new bootstrap.Modal(modalElement);
+  modal.show();
+  // ensure close buttons hide the modal (covers data-dismiss/data-bs-dismiss and .btn-close)
+  try {
+    var closeEls = modalElement.querySelectorAll('[data-bs-dismiss="modal"],[data-dismiss="modal"], .btn-close, .modal-footer .btn');
+    closeEls.forEach(function(btn){
+      btn.addEventListener('click', function(ev){ try { modal.hide(); } catch(e){} });
+    });
+  } catch(e){}
+
+  if (modalBody) {
+    modalBody.innerHTML = '<div class="text-center py-4">Carregando...</div>';
+    var url = buildUrlWithSprint('/api/tests/search?field=' + encodeURIComponent(field) + '&value=' + encodeURIComponent(value));
+    fetch(url, { cache: 'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var items = (data && Array.isArray(data.tests)) ? data.tests : [];
+        if (!items.length) {
+          modalBody.innerHTML = '<div class="text-center py-3 text-muted">Nenhum ticket encontrado.</div>';
+          return;
+        }
+        var escapeHtml = function(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); };
+        var html = '<div style="max-height:420px;overflow:auto;padding-right:6px">';
+  var statusColors = { 'Reprovado': '#bf304a', 'Aprovado': '#4d8764', 'Validado': '#232db8' };
+  var isStatus = (field === 'resultado');
+  // colors for other charts
+  var fieldColors = { 'atribuido_a': '#2b15c1', 'estrutura': '#1cbb8c' };
+        items.forEach(function(t){
+          var ticket = (t.numero_ticket !== null && typeof t.numero_ticket !== 'undefined') ? ('#' + String(t.numero_ticket)) : '';
+          var resumo = escapeHtml(t.resumo_tarefa || '');
+          var link = t.link_tarefa || '#';
+          // determine display label and color
+          var labelText = '';
+          if (field === 'resultado') {
+            labelText = value;
+          } else if (field === 'atribuido_a') {
+            // show the actual developer name (value) instead of the generic label
+            labelText = value || '';
+          } else if (field === 'estrutura') {
+            // show the specific estrutura name when available
+            labelText = value || 'Estrutura';
+          } else {
+            labelText = field;
+          }
+          var labelEsc = escapeHtml(labelText);
+          var color = null;
+          if (field === 'resultado') {
+            color = statusColors[value] || '#444';
+          } else if (fieldColors[field]) {
+            color = fieldColors[field];
+          }
+          var cardStyle = 'background:#23272b;border-radius:10px;padding:18px 16px 14px 16px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,0.07);border:1px solid #343a40;';
+          var divider = '<hr style="border:0;border-top:1.5px solid #343a40;margin:0 0 14px 0;">';
+          html += '<div style="' + cardStyle + '">';
+          html += '<div class="d-flex align-items-start mb-1">';
+          if (color) {
+            html += '<div style="flex:0 0 90px;padding-top:4px;">' +
+                      '<span style="display:inline-block;padding:.25rem .5rem;border-radius:.25rem;background:' + color + ';color:#fff;font-size:1rem;">' + labelEsc + '</span>' +
+                    '</div>';
+          } else {
+            html += '<div style="flex:0 0 90px;padding-top:4px;">' +
+                      '<span class="badge badge-info" style="padding:.35rem .6rem;font-size:1rem;">' + labelEsc + '</span>' +
+                    '</div>';
+          }
+          html += '<div class="flex-fill">' +
+                      '<a href="' + escapeHtml(link) + '" target="_blank" style="text-decoration:underline;color:#f8f9fa;font-size:1.08rem;">' + ticket + ' - ' + resumo + '</a>' +
+                    '</div>';
+          html += '</div>';
+          html += '</div>';
+          html += divider;
+        });
+        html += '</div>';
+        modalBody.innerHTML = html;
+      })
+      .catch(function(err){ console.error('tests-search error', err); modalBody.innerHTML = '<div class="text-center py-3 text-muted">Erro ao carregar os tickets.</div>'; });
+  }
 }
 
 // Load available sprints and wire change handler

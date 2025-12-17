@@ -37,77 +37,82 @@ var options = {
 chart = new ApexCharts(document.querySelector("#line-column-chart"), options);
 chart.render();
 // Configuração do gráfico de donut com suporte a clique
+// Build donut options using server-provided arrays when available
+var _topLabels = (window.topProjectsLabels && window.topProjectsLabels.length) ? window.topProjectsLabels : ["Gfrotas", "Public", "Tecvoto"];
+var _topSeries = (window.topProjectsCounts && window.topProjectsCounts.length) ? window.topProjectsCounts : [10, 25, 65];
 var donutOptions = {
-    series: [10, 25, 65],
+    series: _topSeries,
     chart: {
-        height: 230,
+        height: 320,
         type: "donut",
         events: {
             dataPointSelection: function(event, chartContext, config) {
-                const projectNames = ["Gfrotas", "Public", "Tecvoto"];
-                const projectDetails = [
-                    "Detalhes sobre o projeto Gfrotas. Este é um projeto interno da empresa.",
-                    "Detalhes sobre o projeto Public. Projeto voltado para o público em geral.",
-                    "Detalhes sobre o projeto Tecvoto. Solução de votação eletrônica."
-                ];
-                
-                const index = config.dataPointIndex;
-                const projectName = projectNames[index];
-                const value = donutOptions.series[index];
-                
+                var index = config.dataPointIndex;
+                var projectName = _topLabels[index] || '—';
+                var value = this.w.config.series[index] || _topSeries[index] || 0;
+
+                // build a simple details string (no extra details available server-side)
+                var details = 'Atividades: ' + value;
+                if (window.topProjectsPercentages && window.topProjectsPercentages[index] !== undefined) {
+                    details += ' — ' + window.topProjectsPercentages[index] + ' % do período';
+                }
+
                 // Atualiza o conteúdo do modal
-                document.getElementById('modalTitle').textContent = `Detalhes do Projeto`;
+                document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
                 document.getElementById('modalProject').textContent = projectName;
                 document.getElementById('modalValue').textContent = value;
-                document.getElementById('modalDetails').textContent = projectDetails[index];
-                
+                document.getElementById('modalDetails').textContent = details;
+
                 // Mostra o modal
                 var modalElement = document.getElementById('donutModal');
                 var modal = new bootstrap.Modal(modalElement);
                 modal.show();
-
-                // Adiciona evento de clique ao botão de fechar
-                var closeButton = modalElement.querySelector('[data-bs-dismiss="modal"]');
-                if (closeButton) {
-                    closeButton.addEventListener('click', function() {
-                        modal.hide();
-                    });
-                }
-
             }
         }
     },
-    stroke: {
-        show: false      
-    },
-    labels: ["Gfrotas", "Public", "Tecvoto"],
+    stroke: { show: false },
+    labels: _topLabels,
     plotOptions: {
-        pie: {
-            donut: {
-                size: "75%"
-            },
-            customScale: 0.9
-        }
+        pie: { donut: { size: '75%' }, customScale: 0.9 }
     },
-    dataLabels: {
-        enabled: false
-    },
-    legend: {
-        show: false
-    },
-    colors: ["#4aa3ff", "#eeb902", "#ff3d60"],
-    tooltip: {
-        y: {
-            formatter: function(value) {
-                return value + "%";
-            }
-        }
-    }
+    dataLabels: { enabled: false },
+    // We hide the chart's built-in legend so only the custom/HTML legend
+    // (rendered below the chart in the Blade) remains visible.
+    legend: { show: false },
+    colors: ["#4aa3ff", "#1cc88a", "#f6c23e", "#ff3d60", "#6c5ce7"],
+    tooltip: { y: { formatter: function(value){ return value + ' atividades'; } } }
 };
 
-// Inicializa o gráfico de donut
-var donutChart = new ApexCharts(document.querySelector("#donut-chart"), donutOptions);
-donutChart.render();
+// Inicializa o gráfico de donut (skip se o container marcar para pular inicialização)
+var donutEl = document.querySelector("#donut-chart");
+if (donutEl && donutEl.dataset && donutEl.dataset.skipThemeInit !== '1') {
+    var donutChart = new ApexCharts(donutEl, donutOptions);
+    // Render and then synchronize the HTML legend dots below the chart
+    // with the chart's slice colors so everything is automatic.
+    donutChart.render().then(function(){
+        try {
+            var colors = (donutChart.w && donutChart.w.config && donutChart.w.config.colors) ? donutChart.w.config.colors : donutOptions.colors;
+            var cardBody = donutEl.closest('.card-body');
+            var legendContainer = cardBody ? cardBody.querySelector('.row') : null;
+            if (legendContainer) {
+                var legendDots = legendContainer.querySelectorAll('.mdi-circle');
+                legendDots.forEach(function(dot, idx){
+                    // remove any bootstrap color utility classes that may conflict
+                    dot.classList.remove('text-info','text-danger','text-warning','text-primary','text-success');
+                    // apply the exact chart color for that index
+                    if (colors && colors[idx]) {
+                        dot.style.color = colors[idx];
+                    }
+                }); 
+            }
+        } catch (e) {
+            // fail silently if DOM structure differs
+            console.warn('Could not sync donut legend colors:', e);
+        }
+    });
+} else {
+    // skipping theme donut init because server-rendered or custom chart present
+}
 
 var radialoptions = {
         series: [20],
@@ -541,8 +546,8 @@ try {
             stroke: { curve: 'smooth', width: 3 },
             series: [
                 // Alinhar quantidade de pontos às 4 sprints
-                { name: 'series1', data: [34, 40, 28, 52] },
-                { name: 'series2', data: [32, 60, 34, 46] }
+                { name: 'Criadas', data: [34, 40, 28, 52] },
+                { name: 'Validadas', data: [32, 60, 34, 46] }
             ],
             colors: ['#5664d2', '#1cbb8c'],
             xaxis: {
