@@ -345,14 +345,34 @@
 
                                
                                 <div class="row">
-                                    <div class="col-xl-6">
+                                    <div class="col-lg-6">
                                         <div class="card">
                                             <div class="card-body">
-                                                <h4 class="card-title mb-2">Relação Geral entre quantidades de Melhorias e Bugs</h4>
-                                                <div id="financial-chart" class="apex-charts" dir="ltr"></div>
+
+                                                <h4 class="card-title mb-4">Total Horas Estimadas x Horas Gastas (Por Usuário)</h4>
+
+                                                <div class="row text-center">
+                                                    <div class="col-4">
+                                                        <h5 class="mb-0">9595</h5>
+                                                        <p class="text-muted text-truncate">Horas Estimadas</p>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <h5 class="mb-0">36524</h5>
+                                                        <p class="text-muted text-truncate">Horas Gastas</p>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <h5 class="mb-0">62541</h5>
+                                                        <p class="text-muted text-truncate"></p>
+                                                    </div>
+                                                </div>
+
+                                                <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center;">
+                                                    <canvas id="doughnut" style="width:100%; height:100%;"></canvas>
+                                                </div>
+
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> <!-- end col -->
                                     
                                 
                                     <div class="col-xl-6">
@@ -382,7 +402,7 @@
                                     </div> -->
                                     <div class="float-right d-none d-md-inline-block">
                                         <div class="btn-group mb-2">
-                                            <button type="button" class="btn btn-sm btn-light">Ver todos os Projetos</button>
+                                            <a href="{{ route('projects.all') }}" class="btn btn-sm btn-light">Ver todos os Projetos</a>
                                         </div>
                                     </div>
                                     <h4 class="card-title mb-4">Projetos com mais atividades</h4>
@@ -884,7 +904,9 @@
 
     <script src="assets/js/pages/datatables.init.js"></script>
 
+    <script src="assets/libs/chart.js/Chart.bundle.min.js"></script>
     <script src="assets/js/pages/dashboard.init.js"></script>
+    <script src="assets/js/pages/dashboard_projects.init.js"></script>
 
     <script src="assets/js/app.js"></script>
 

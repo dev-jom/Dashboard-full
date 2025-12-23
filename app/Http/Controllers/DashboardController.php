@@ -312,5 +312,63 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Serve the "All Projects" page with the 'testes-por-estrutura' chart data.
+     */
+    public function projectsAll(Request $request)
+    {
+        $now = Carbon::now();
+
+        // Determine period from query (reuse same logic as index)
+        $range = $request->query('range', 'month');
+        if ($range === 'year') {
+            $periodStart = $now->copy()->startOfYear();
+            $periodEnd = $now->copy()->endOfYear();
+            $periodLabel = 'Este ano';
+        } elseif ($range === 'custom') {
+            $startStr = $request->query('start');
+            $endStr = $request->query('end');
+            try {
+                $periodStart = $startStr ? Carbon::parse($startStr)->startOfDay() : $now->copy()->startOfMonth();
+            } catch (\Exception $e) {
+                $periodStart = $now->copy()->startOfMonth();
+            }
+            try {
+                $periodEnd = $endStr ? Carbon::parse($endStr)->endOfDay() : $now->copy()->endOfMonth();
+            } catch (\Exception $e) {
+                $periodEnd = $now->copy()->endOfMonth();
+            }
+            $periodLabel = ($periodStart->format('d/m/Y') . ' - ' . $periodEnd->format('d/m/Y'));
+        } else {
+            $periodStart = $now->copy()->startOfMonth();
+            $periodEnd = $now->copy()->endOfMonth();
+            $periodLabel = 'Este mês';
+        }
+
+        // Get all projects and their activity counts in the period
+        $projectsQuery = DB::table('tickets_redmine')
+            ->select('project', DB::raw('count(*) as activities'))
+            ->whereBetween('created_at', [$periodStart->startOfDay(), $periodEnd->endOfDay()])
+            ->groupBy('project')
+            ->orderByDesc('activities')
+            ->get();
+
+        $labels = $projectsQuery->pluck('project')->toArray();
+        $counts = $projectsQuery->pluck('activities')->toArray();
+
+        $totalActivities = array_sum($counts);
+        $percentages = [];
+        foreach ($counts as $c) {
+            $percentages[] = $totalActivities > 0 ? round(($c / $totalActivities) * 100, 1) : 0;
+        }
+
+        return view('projects_all', [
+            'topProjectsLabels' => $labels,
+            'topProjectsCounts' => $counts,
+            'topProjectsPercentages' => $percentages,
+            'periodLabel' => $periodLabel,
+        ]);
+    }
+
     
 }

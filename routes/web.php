@@ -9,6 +9,8 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/api/dashboard/summary', [DashboardController::class, 'summary']);
 
 Route::view('/dashboard-teste', 'dashboard_teste_fixed')->name('dashboard.teste');
+// Tela com todos os projetos mostrando o gráfico de "Testes por Estrutura"
+Route::get('/projects', [DashboardController::class, 'projectsAll'])->name('projects.all');
 
 // API endpoints for Dashboard de Testes (using web.php since routes/api.php is not present)
 Route::prefix('api')->group(function () {

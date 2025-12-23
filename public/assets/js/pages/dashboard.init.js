@@ -442,8 +442,57 @@ var financialChartOptions = {
     }
 };
 
-var financialChart = new ApexCharts(document.querySelector("#financial-chart"), financialChartOptions);
-financialChart.render();
+// Replace the financial ApexCharts instance with a Chart.js Radar chart.
+// We create the canvas inside the existing container and initialize Chart.js on window load
+// Replace the financial ApexCharts instance with a Chart.js Radar chart.
+// We create the canvas inside the existing container and initialize Chart.js on window load
+window.addEventListener('load', function(){
+    try {
+        var finContainer = document.querySelector('#financial-chart');
+        if (!finContainer) return;
+        // insert canvas
+        finContainer.innerHTML = '<canvas id="financial-radar" style="max-width:100%;height:360px"></canvas>';
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not available yet — radar will initialize on next load.');
+            return;
+        }
+        var ctx = document.getElementById('financial-radar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ["Eating", "Drinking", "Sleeping", "Designing", "Coding", "Cycling", "Running"],
+                datasets: [{
+                    label: "Desktops",
+                    backgroundColor: "rgba(252, 185, 44, 0.2)",
+                    borderColor: "#fcb92c",
+                    pointBackgroundColor: "#fcb92c",
+                    pointBorderColor: "#fff",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "#fcb92c",
+                    data: [65, 59, 90, 81, 56, 55, 40]
+                }, {
+                    label: "Tablets",
+                    backgroundColor: "rgba(84, 56, 220, 0.2)",
+                    borderColor: "#5664d2",
+                    pointBackgroundColor: "#5664d2",
+                    pointBorderColor: "#fff",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "#5664d2",
+                    data: [28, 48, 40, 19, 96, 27, 100]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scale: {
+                    ticks: { beginAtZero: true }
+                }
+            }
+        });
+    } catch (e) {
+        console.error('Error initializing financial radar chart:', e);
+    }
+});
 
 // === Cópia do módulo financial chart: 'criadasXaprovadas' ===
 // Criamos uma cópia profunda para não compartilhar referências com o gráfico original
