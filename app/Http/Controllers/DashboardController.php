@@ -118,15 +118,16 @@ class DashboardController extends Controller
         }
 
         // --- Top projects by activity (period filter: month|year|custom) ---
-        $range = $request->query('range', 'month'); // month, year, custom
+        // Use dedicated query params for this card so it doesn't interfere with other charts
+        $range = $request->query('top_range', 'month'); // month, year, custom
         $topLimit = max(1, (int) $request->query('top', 3));
         if ($range === 'year') {
             $periodStart = $now->copy()->startOfYear();
             $periodEnd = $now->copy()->endOfYear();
-            $periodLabel = 'Este ano';
+            $topPeriodLabel = 'Este ano';
         } elseif ($range === 'custom') {
-            $startStr = $request->query('start');
-            $endStr = $request->query('end');
+            $startStr = $request->query('top_start');
+            $endStr = $request->query('top_end');
             try {
                 $periodStart = $startStr ? Carbon::parse($startStr)->startOfDay() : $now->copy()->startOfMonth();
             } catch (\Exception $e) {
@@ -137,12 +138,12 @@ class DashboardController extends Controller
             } catch (\Exception $e) {
                 $periodEnd = $now->copy()->endOfMonth();
             }
-            $periodLabel = ($periodStart->format('d/m/Y') . ' - ' . $periodEnd->format('d/m/Y'));
+            $topPeriodLabel = ($periodStart->format('d/m/Y') . ' - ' . $periodEnd->format('d/m/Y'));
         } else {
             // default: month
             $periodStart = $now->copy()->startOfMonth();
             $periodEnd = $now->copy()->endOfMonth();
-            $periodLabel = 'Este mês';
+            $topPeriodLabel = 'Este mês';
         }
 
         $topProjectsQuery = DB::table('tickets_redmine')
@@ -163,7 +164,7 @@ class DashboardController extends Controller
 
         $topProjectsPercentages = [];
 
-        // If there are no activities in the selected date range, try fallback by sprint code (e.g. SP154)
+        // If there are no activities in the selected date range, try fallback to sprint code (e.g. SP154)
         if ($totalActivities === 0 || empty($topProjectsCounts)) {
             $sprintCode = 'SP' . $sprintNumber;
             // Try to get top projects by sprint code (extract SP### from the free-text `sprint` column)
@@ -182,8 +183,8 @@ class DashboardController extends Controller
                 ->whereRaw("substring(sprint from '(SP[0-9]+)') = ?", [$sprintCode])
                 ->count();
 
-            // adjust period label to indicate we used sprint fallback
-            $periodLabel = 'Sprint ' . $sprintCode;
+            // adjust period label to indicate we used sprint fallback (affects top projects only)
+            $topPeriodLabel = 'Sprint ' . $sprintCode;
         }
 
         foreach ($topProjectsCounts as $cnt) {
@@ -192,6 +193,47 @@ class DashboardController extends Controller
             } else {
                 $topProjectsPercentages[] = 0;
             }
+        }
+
+        // --- Build available sprints list for UI filters ---
+        $sprintRows = \DB::table('tickets_redmine')
+            ->select('sprint')
+            ->whereNotNull('sprint')
+            ->get();
+        $uiSprints = [];
+        foreach ($sprintRows as $r) {
+            $sprintRaw = trim($r->sprint);
+            $label = preg_replace('/\s*\(.*$/', '', $sprintRaw);
+            $label = trim($label) ?: $sprintRaw;
+            if (preg_match('/(\d{2}\/\d{2}\/\d{2,4})\s*(?:-|a|até|to)\s*(\d{2}\/\d{2}\/\d{2,4})/i', $sprintRaw, $m)) {
+                // parse dates to normalize duplicates like in sprintsTasks
+                $normalize = function ($s) {
+                    $parts = explode('/', $s);
+                    if (count($parts) === 3 && strlen($parts[2]) === 2) {
+                        $parts[2] = '20' . $parts[2];
+                    }
+                    return implode('/', $parts);
+                };
+                try {
+                    $start = \Carbon\Carbon::createFromFormat('d/m/Y', $normalize($m[1]))->startOfDay();
+                    $end = \Carbon\Carbon::createFromFormat('d/m/Y', $normalize($m[2]))->endOfDay();
+                } catch (\Exception $e) {
+                    continue;
+                }
+                if (!isset($uiSprints[$label]) || $start->lt($uiSprints[$label]['start'])) {
+                    $uiSprints[$label] = ['label' => $label, 'start' => $start, 'end' => $end];
+                }
+            }
+        }
+        $sprintsArr = array_values($uiSprints);
+        usort($sprintsArr, function ($a, $b) {
+            return $a['end']->gt($b['end']) ? -1 : 1; // newest first
+        });
+        $availableSprints = [];
+        foreach ($sprintsArr as $sp) {
+            $num = null;
+            if (preg_match('/SP\s*(\d+)/i', $sp['label'], $mm)) $num = (int)$mm[1];
+            $availableSprints[] = ['value' => $num ?: $sp['label'], 'label' => $sp['label']];
         }
 
         return view('dashboard', [
@@ -212,7 +254,8 @@ class DashboardController extends Controller
             'topProjectsLabels' => $topProjectsLabels ?? [],
             'topProjectsCounts' => $topProjectsCounts ?? [],
             'topProjectsPercentages' => $topProjectsPercentages ?? [],
-            'periodLabel' => $periodLabel ?? null,
+            'topPeriodLabel' => $topPeriodLabel ?? null,
+            'availableSprints' => $availableSprints,
         ]);
     }
 
@@ -370,5 +413,169 @@ class DashboardController extends Controller
         ]);
     }
 
-    
+    public function sprintsTasks(\Illuminate\Http\Request $request)
+    {
+        $now = \Carbon\Carbon::now();
+
+        $rows = \DB::table('tickets_redmine')
+            ->select('sprint', 'created_at', 'status')
+            ->whereNotNull('sprint')
+            ->get();
+
+        $sprints = [];
+
+        foreach ($rows as $r) {
+            $sprintRaw = trim($r->sprint);
+            $label = preg_replace('/\s*\(.*$/', '', $sprintRaw);
+            $label = trim($label) ?: $sprintRaw;
+
+            if (preg_match('/(\d{2}\/\d{2}\/\d{2,4})\s*(?:-|a|até|to)\s*(\d{2}\/\d{2}\/\d{2,4})/i', $sprintRaw, $m)) {
+                $startStr = $m[1];
+                $endStr = $m[2];
+
+                $normalize = function ($s) {
+                    $parts = explode('/', $s);
+                    if (count($parts) === 3 && strlen($parts[2]) === 2) {
+                        $parts[2] = '20' . $parts[2];
+                    }
+                    return implode('/', $parts);
+                };
+
+                try {
+                    $start = \Carbon\Carbon::createFromFormat('d/m/Y', $normalize($startStr))->startOfDay();
+                    $end = \Carbon\Carbon::createFromFormat('d/m/Y', $normalize($endStr))->endOfDay();
+                } catch (\Exception $e) {
+                    continue;
+                }
+
+                if (!isset($sprints[$label])) {
+                    $sprints[$label] = ['label' => $label, 'start' => $start, 'end' => $end];
+                } else {
+                    if ($start->lt($sprints[$label]['start'])) {
+                        $sprints[$label]['start'] = $start;
+                    }
+                    if ($end->gt($sprints[$label]['end'])) {
+                        $sprints[$label]['end'] = $end;
+                    }
+                }
+            }
+        }
+
+        if (empty($sprints)) {
+            return response()->json(['labels' => [], 'created' => [], 'validated' => []]);
+        }
+
+        $sprintsArr = array_values($sprints);
+        // sort by end ascending
+        usort($sprintsArr, function ($a, $b) {
+            return $a['end']->lt($b['end']) ? -1 : 1;
+        });
+
+        // enrich with numeric sprint number when possible
+        $sprintsEnriched = array_map(function ($s) {
+            $num = null;
+            if (preg_match('/SP\s*(\d+)/i', $s['label'], $mm)) {
+                $num = (int) $mm[1];
+            }
+            $s['number'] = $num;
+            return $s;
+        }, $sprintsArr);
+
+        // Filtering by query params:
+        // - sprints: comma separated list of sprint numbers or labels (e.g. "144,145" or "SP144,SP145")
+        // - from / to: numeric sprint range (e.g. ?from=150&to=154)
+        $querySprints = $request->query('sprints');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        $selected = [];
+
+        if ($querySprints) {
+            // normalize list into numbers where possible
+            $parts = preg_split('/[;,\s]+/', $querySprints);
+            $wanted = [];
+            foreach ($parts as $p) {
+                $p = trim($p);
+                if ($p === '') continue;
+                if (preg_match('/SP\s*(\d+)/i', $p, $m)) {
+                    $wanted[] = (int)$m[1];
+                } elseif (preg_match('/^\d+$/', $p)) {
+                    $wanted[] = (int)$p;
+                } else {
+                    // also allow raw labels (match by LIKE)
+                    $wanted[] = $p;
+                }
+            }
+
+            foreach ($sprintsEnriched as $s) {
+                if (is_int($s['number']) && in_array($s['number'], $wanted, true)) {
+                    $selected[] = $s;
+                } else {
+                    // check textual match as fallback
+                    foreach ($wanted as $w) {
+                        if (!is_int($w) && stripos($s['label'], (string)$w) !== false) {
+                            $selected[] = $s; break;
+                        }
+                    }
+                }
+            }
+        } elseif ($from !== null || $to !== null) {
+            $f = $from !== null ? (int)$from : null;
+            $t = $to !== null ? (int)$to : $f;
+            if ($f === null) {
+                // nothing sensible provided
+                $f = $t;
+            }
+            if ($f !== null && $t !== null) {
+                $min = min($f, $t);
+                $max = max($f, $t);
+                foreach ($sprintsEnriched as $s) {
+                    if (is_int($s['number']) && $s['number'] >= $min && $s['number'] <= $max) {
+                        $selected[] = $s;
+                    }
+                }
+            }
+        }
+
+        // Default: last 4 sprints (most recent by end date)
+        if (empty($selected)) {
+            usort($sprintsEnriched, function ($a, $b) { return $a['end']->gt($b['end']) ? -1 : 1; });
+            $latest = array_slice($sprintsEnriched, 0, 4);
+            // restore chronological order
+            $latest = array_reverse($latest);
+            $selected = $latest;
+        } else {
+            // ensure chronological order (oldest -> newest)
+            usort($selected, function ($a, $b) { return $a['end']->lt($b['end']) ? -1 : 1; });
+        }
+
+        $labels = [];
+        $created = [];
+        $validated = [];
+
+        foreach ($selected as $s) {
+            $labels[] = $s['label'];
+            $between = [$s['start']->toDateTimeString(), $s['end']->toDateTimeString()];
+
+            $countCreated = \DB::table('tickets_redmine')
+                ->where('sprint', 'LIKE', "%{$s['label']}%")
+                ->whereBetween('created_at', $between)
+                ->count();
+
+            $countValidated = \DB::table('tickets_redmine')
+                ->where('sprint', 'LIKE', "%{$s['label']}%")
+                ->where('status', 'Validado')
+                ->whereBetween('created_at', $between)
+                ->count();
+
+            $created[] = $countCreated;
+            $validated[] = $countValidated;
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'created' => $created,
+            'validated' => $validated,
+        ]);
+    }
 }

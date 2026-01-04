@@ -379,6 +379,34 @@
                                         <div class="card">
                                             <div class="card-body">
                                                 <h4 class="card-title mb-4">Relação entre quantidade de tarefas Criadas e Validadas</h4>
+
+                                                <!-- Sprint filter for Criadas x Validadas (moved here) -->
+                                                <form id="sprints-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
+                                                    <label class="mr-2">Período:</label>
+                                                    <select name="range" id="range-select" class="custom-select custom-select-sm mr-2">
+                                                        <option value="month" {{ request('range','month')=='month' ? 'selected' : '' }}>Este mês</option>
+                                                        <option value="year" {{ request('range')=='year' ? 'selected' : '' }}>Este ano</option>
+                                                        <option value="custom" {{ request('range')=='custom' ? 'selected' : '' }}>Personalizado</option>
+                                                    </select>
+                                                    <input type="date" name="start" id="start-date" class="form-control form-control-sm mr-2" value="{{ request('start') }}" style="{{ request('range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+                                                    <select id="sprint-select" name="sprints" class="custom-select custom-select-sm mr-2" style="{{ request('range')=='custom' ? 'display:inline-block;width:220px;' : 'display:none;width:220px;' }}">
+                                                        <option value="">-- Selecionar sprint --</option>
+                                                        @if(isset($availableSprints) && is_array($availableSprints))
+                                                            @foreach($availableSprints as $sp)
+                                                                <option value="{{ $sp['value'] }}" {{ request('sprints') == $sp['value'] ? 'selected' : '' }}>{{ $sp['label'] }}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                    <input type="date" name="end" id="end-date" class="form-control form-control-sm mr-2" value="{{ request('end') }}" style="display: none;">
+                                                    <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                                </form>
+
+                                                <!-- DEBUG: show detected sprints (temporary, moved near the filter) -->
+                                                <div id="sprint-debug" style="margin-top:6px;color:#cdd;">
+                                                    <small><strong>Debug:</strong> sprints detectadas: {{ isset($availableSprints) ? count($availableSprints) : 0 }}</small>
+                                                    <pre style="margin:4px 0 0;padding:6px;background:rgba(255,255,255,0.02);color:#ddd;border-radius:4px;max-height:120px;overflow:auto">@json(array_map(function($s){ return $s['label'] ?? $s; }, $availableSprints ?? []))</pre>
+                                                </div>
+
                                                 <div id="spline_area" class="apex-charts" dir="ltr"></div>  
                                             </div>
                                         </div>
@@ -407,15 +435,16 @@
                                     </div>
                                     <h4 class="card-title mb-4">Projetos com mais atividades</h4>
 
-                                    <form id="top-projects-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
+                                    <!-- Filtro de período para Projetos com mais atividades -->
+                                    <form id="top-projects-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
                                         <label class="mr-2">Período:</label>
-                                        <select name="range" id="range-select" class="custom-select custom-select-sm mr-2">
-                                            <option value="month" {{ request('range','month')=='month' ? 'selected' : '' }}>Este mês</option>
-                                            <option value="year" {{ request('range')=='year' ? 'selected' : '' }}>Este ano</option>
-                                            <option value="custom" {{ request('range')=='custom' ? 'selected' : '' }}>Personalizado</option>
+                                        <select name="top_range" id="top-projects-range-select" class="custom-select custom-select-sm mr-2">
+                                            <option value="month" {{ request('top_range','month')=='month' ? 'selected' : '' }}>Este mês</option>
+                                            <option value="year" {{ request('top_range')=='year' ? 'selected' : '' }}>Este ano</option>
+                                            <option value="custom" {{ request('top_range')=='custom' ? 'selected' : '' }}>Personalizado</option>
                                         </select>
-                                        <input type="date" name="start" id="start-date" class="form-control form-control-sm mr-2" value="{{ request('start') }}" style="display: none;">
-                                        <input type="date" name="end" id="end-date" class="form-control form-control-sm mr-2" value="{{ request('end') }}" style="display: none;">
+                                        <input type="date" name="top_start" id="top-projects-start-date" class="form-control form-control-sm mr-2" value="{{ request('top_start') }}" style="{{ request('top_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+                                        <input type="date" name="top_end" id="top-projects-end-date" class="form-control form-control-sm mr-2" value="{{ request('top_end') }}" style="{{ request('top_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
                                         <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
                                     </form>
 
@@ -671,10 +700,6 @@
                                                     <td>10/02/2025</td>
                                                     <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
                                                     <td>Caio Andrade</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20415" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
                                                 <tr>
                                                     <td>6</td>
                                                     <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20544</a></td>
@@ -869,17 +894,32 @@
 
     <script src="assets/libs/apexcharts/apexcharts.min.js"></script>
     <script>
-        // Toggle custom date inputs
+        // Toggle custom date inputs for multiple filters
         (function(){
-            var range = document.getElementById('range-select');
-            var start = document.getElementById('start-date');
-            var end = document.getElementById('end-date');
-            function toggle() {
-                if (!range) return;
-                if (range.value === 'custom') { start.style.display = 'inline-block'; end.style.display = 'inline-block'; }
-                else { start.style.display = 'none'; end.style.display = 'none'; }
+            function bindToggle(rangeId, opts){
+                var range = document.getElementById(rangeId);
+                var start = document.getElementById(opts.startId);
+                var end = document.getElementById(opts.endId);
+                var extra = opts.extraId ? document.getElementById(opts.extraId) : null;
+                function toggle(){
+                    if(!range) return;
+                    if(range.value === 'custom'){
+                        if(start) start.style.display = 'inline-block';
+                        if(end) end.style.display = 'inline-block';
+                        if(extra) extra.style.display = 'inline-block';
+                    } else {
+                        if(start) start.style.display = 'none';
+                        if(end) end.style.display = 'none';
+                        if(extra) extra.style.display = 'none';
+                    }
+                }
+                if(range){ range.addEventListener('change', toggle); toggle(); }
             }
-            if (range) { range.addEventListener('change', toggle); toggle(); }
+
+            // Bind existing sprint filter (uses sprint-select)
+            bindToggle('range-select', { startId: 'start-date', endId: 'end-date', extraId: 'sprint-select' });
+            // Bind top-projects filter (two date inputs)
+            bindToggle('top-projects-range-select', { startId: 'top-projects-start-date', endId: 'top-projects-end-date' });
         })();
 
         // Donut chart is initialized by `assets/js/pages/dashboard.init.js`
@@ -890,7 +930,7 @@
         window.topProjectsLabels = @json($topProjectsLabels ?? []);
         window.topProjectsCounts = @json($topProjectsCounts ?? []);
         window.topProjectsPercentages = @json($topProjectsPercentages ?? []);
-        window.periodLabel = @json($periodLabel ?? null);
+        window.topPeriodLabel = @json($topPeriodLabel ?? null);
     </script>
 
     <script src="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
@@ -905,8 +945,13 @@
     <script src="assets/js/pages/datatables.init.js"></script>
 
     <script src="assets/libs/chart.js/Chart.bundle.min.js"></script>
-    <script src="assets/js/pages/dashboard.init.js"></script>
-    <script src="assets/js/pages/dashboard_projects.init.js"></script>
+    <script>
+        // Prevent static initializers from rendering the spline area; dynamic loader will render it.
+        window.__sprintsAreaManaged = true;
+    </script>
+
+    <script src="{{ asset('assets/js/pages/dashboard.init.js') }}?v={{ filemtime(public_path('assets/js/pages/dashboard.init.js')) }}"></script>
+    <script src="{{ asset('assets/js/pages/dashboard_projects.init.js') }}?v={{ filemtime(public_path('assets/js/pages/dashboard_projects.init.js')) }}"></script>
 
     <script src="assets/js/app.js"></script>
 

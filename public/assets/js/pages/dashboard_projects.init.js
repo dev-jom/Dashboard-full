@@ -136,3 +136,50 @@ window.addEventListener('load', function(){
     console.error('Error initializing doughnut chart (projects):', e);
   }
 });
+
+// --- Sprints area chart loader ---
+(function(){
+  async function loadSprintsArea(query){
+    try{
+      var qs = (typeof query !== 'undefined' && query !== null) ? (query || '') : (window.location.search || '');
+      var container = document.getElementById('spline_area');
+      if(!container) return;
+      container.innerHTML = '<div style="padding:30px;text-align:center;color:#6c757d">Carregando gráfico...</div>';
+      var url = '/api/dashboard/sprints-tasks' + qs;
+      var res = await fetch(url);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      var json = await res.json();
+      var labels = json.labels || [];
+      var created = json.created || [];
+      var validated = json.validated || [];
+      if(!labels.length){ container.innerHTML = '<div style="padding:30px;text-align:center;color:#6c757d">Sem dados para exibir</div>'; return; }
+      container.innerHTML = '';
+      var options = {
+        chart: { type: 'area', height: 373, toolbar: { show: false } },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 3 },
+        series: [ { name: 'Criadas', data: created }, { name: 'Validadas', data: validated } ],
+        colors: ['#5664d2', '#1cbb8c'],
+        markers: { size: 5 },
+        xaxis: { categories: labels, labels: { rotate: -45 } },
+        yaxis: { title: { text: 'Quantidade' } },
+        legend: { position: 'top' },
+        tooltip: { shared: true, intersect: false }
+      };
+      if(typeof ApexCharts === 'undefined'){
+        console.warn('ApexCharts not loaded');
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:#d9534f">Biblioteca de gráficos não encontrada</div>';
+        return;
+      }
+      var chart = new ApexCharts(container, options);
+      chart.render();
+      // expose last chart instance so we can update later if needed
+      window.__sprintsAreaChart = chart;
+    }catch(e){ console.error('Erro carregando sprints area', e); var c=document.getElementById('spline_area'); if(c) c.innerHTML = '<div style="padding:30px;text-align:center;color:#d9534f">Erro ao carregar gráfico</div>' }
+  }
+
+  // expose a helper to reload the sprints area from other code (e.g. form submit)
+  window.reloadSprintsArea = function(query){ return loadSprintsArea(query); };
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ loadSprintsArea(); }); else loadSprintsArea();
+})();

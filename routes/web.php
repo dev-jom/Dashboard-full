@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardTesteApiController;
@@ -21,3 +21,6 @@ Route::prefix('api')->group(function () {
     Route::get('/devs/activities-count', [DashboardTesteApiController::class, 'devActivitiesCount']);
     Route::get('/structures/tests-count', [DashboardTesteApiController::class, 'structuresTestsCount']);
 });
+
+// API route used by dashboard spline area chart
+Route::get('api/dashboard/sprints-tasks', [\App\Http\Controllers\DashboardController::class, 'sprintsTasks']);

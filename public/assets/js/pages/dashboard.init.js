@@ -587,33 +587,38 @@ criadasXaprovadasChart.render();
 // Spline Area chart for #spline_area on the dashboard page
 // Kept minimal to avoid loading the full apexcharts.init.js (which initializes many other charts)
 try {
-    var splineAreaEl = document.querySelector('#spline_area');
-    if (splineAreaEl) {
-        var splineAreaOptions = {
-            chart: { height: 373, type: 'area' },
-            dataLabels: { enabled: false },
-            stroke: { curve: 'smooth', width: 3 },
-            series: [
-                // Alinhar quantidade de pontos às 4 sprints
-                { name: 'Criadas', data: [34, 40, 28, 52] },
-                { name: 'Validadas', data: [32, 60, 34, 46] }
-            ],
-            colors: ['#5664d2', '#1cbb8c'],
-            xaxis: {
-                type: 'category',
-                categories: [
-                    'Sprint 147',
-                    'Sprint 148',
-                    'Sprint 149',
-                    'Sprint 150'
-                ]
-            },
-            grid: { borderColor: '#f1f1f1', padding: { bottom: 15 } },
-            tooltip: { x: { show: false } },
-            legend: { offsetY: 7 }
-        };
-        var splineAreaChart = new ApexCharts(splineAreaEl, splineAreaOptions);
-        splineAreaChart.render();
+    // If a dynamic loader is managing the spline area, skip the static initializer
+    if (window && window.__sprintsAreaManaged) {
+        // dynamic loader will render the spline area
+    } else {
+        var splineAreaEl = document.querySelector('#spline_area');
+        if (splineAreaEl) {
+            var splineAreaOptions = {
+                chart: { height: 373, type: 'area' },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 3 },
+                series: [
+                    // Alinhar quantidade de pontos às 4 sprints
+                    { name: 'Criadas', data: [34, 40, 28, 52] },
+                    { name: 'Validadas', data: [32, 60, 34, 46] }
+                ],
+                colors: ['#5664d2', '#1cbb8c'],
+                xaxis: {
+                    type: 'category',
+                    categories: [
+                        'Sprint 147',
+                        'Sprint 148',
+                        'Sprint 149',
+                        'Sprint 150'
+                    ]
+                },
+                grid: { borderColor: '#f1f1f1', padding: { bottom: 15 } },
+                tooltip: { x: { show: false } },
+                legend: { offsetY: 7 }
+            };
+            var splineAreaChart = new ApexCharts(splineAreaEl, splineAreaOptions);
+            splineAreaChart.render();
+        }
     }
 } catch (e) {
     console.error('Erro ao inicializar o gráfico #spline_area:', e);
