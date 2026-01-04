@@ -607,162 +607,17 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20574</a></td>
-                                                    <td>10/02/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Aprovado</div></td>
-                                                    <td>Franklin</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20574" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>2</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20115</a></td>
-                                                    <td>10/02/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Aprovado</div></td>
-                                                    <td>Murillo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20115" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>3</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20115</a></td>
-                                                    <td>10/02/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Murillo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20115" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>4</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20283</a></td>
-                                                    <td>10/02/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Caio Andrade</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20283" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>5</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20415</a></td>
-                                                    <td>10/02/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Caio Andrade</td>
-                                                <tr>
-                                                    <td>6</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20544</a></td>
-                                                    <td>10/03/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Jeff</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20544" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>7</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20576</a></td>
-                                                    <td>10/03/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Murillo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20576" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>8</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20586</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Aprovado</div></td>
-                                                    <td>Jeff</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20586" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>9</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20614</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Kayo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20611" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>10</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20611</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Kayo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20611" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>11</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20604</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Kayo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20604" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>12</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20327</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Murillo</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20327" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>13</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20405</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Jeff</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20405" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>14</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20541</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Moab</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20541" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>15</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20535</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Moab</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20535" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>16</td>
-                                                    <td><a href="javascript: void(0);" class="text-dark font-weight-bold">20477</a></td>
-                                                    <td>10/06/2025</td>
-                                                    <td class=""><div class="badge badge-soft-success font-size-12">Validado</div></td>
-                                                    <td>Max</td>
-                                                    <td class="text-right">
-                                                        <a href="https://redmine.pbsoft.com.br/issues/20477" target="_blank" rel="noopener" class="mr-2 text-primary" data-toggle="tooltip" data-placement="top" title="Abrir no Redmine" data-original-title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a>
-                                                    </td>
-                                                </tr>
+                                                @foreach($recentTasks as $idx => $task)
+                                                    @php $dt = \Carbon\Carbon::parse($task->created_at); @endphp
+                                                    <tr>
+                                                        <td>{{ $idx + 1 }}</td>
+                                                        <td><a href="https://redmine.pbsoft.com.br/issues/{{ (int)$task->id }}" target="_blank" rel="noopener" class="text-dark font-weight-bold">{{ (int)$task->id }}</a></td>
+                                                        <td>{{ $dt->format('d/m/Y') }}</td>
+                                                        <td><div class="badge {{ strtolower(trim($task->status)) === 'validado' ? 'badge-soft-success' : 'badge-soft-secondary' }} font-size-12">{{ $task->status }}</div></td>
+                                                        <td>{{ $task->assigned_to ?? '-' }}</td>
+                                                        <td class="text-right"><a href="https://redmine.pbsoft.com.br/issues/{{ (int)$task->id }}" target="_blank" rel="noopener" class="mr-2 text-primary" title="Abrir no Redmine"><i class="mdi mdi-eye font-size-18"></i></a></td>
+                                                    </tr>
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>

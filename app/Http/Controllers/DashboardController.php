@@ -244,6 +244,13 @@ class DashboardController extends Controller
             ->limit(4)
             ->get();
 
+        // Recent tasks for the 'Últimas tarefas' table (most recent first)
+        $recentTasks = DB::table('tickets_redmine')
+            ->select('id', 'created_at', 'status', 'assigned_to', 'subject')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
         return view('dashboard', [
             'projetosMes' => $projetosMes,
             'projetosMesPrev' => $projetosMesPrev,
@@ -265,6 +272,7 @@ class DashboardController extends Controller
             'topPeriodLabel' => $topPeriodLabel ?? null,
             'availableSprints' => $availableSprints,
             'recentValidated' => $recentValidated ?? collect([]),
+            'recentTasks' => $recentTasks ?? collect([]),
         ]);
     }
 
