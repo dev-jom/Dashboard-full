@@ -380,32 +380,33 @@
                                             <div class="card-body">
                                                 <h4 class="card-title mb-4">Relação entre quantidade de tarefas Criadas e Validadas</h4>
 
-                                                <!-- Sprint filter for Criadas x Validadas (moved here) -->
+                                                <!-- Sprint filter for Criadas x Validadas -->
+                                                <!-- Simplified: only two sprint selectors (from/to). These submit as `from` and `to`. -->
                                                 <form id="sprints-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
-                                                    <label class="mr-2">Período:</label>
-                                                    <select name="range" id="range-select" class="custom-select custom-select-sm mr-2">
-                                                        <option value="month" {{ request('range','month')=='month' ? 'selected' : '' }}>Este mês</option>
-                                                        <option value="year" {{ request('range')=='year' ? 'selected' : '' }}>Este ano</option>
-                                                        <option value="custom" {{ request('range')=='custom' ? 'selected' : '' }}>Personalizado</option>
-                                                    </select>
-                                                    <input type="date" name="start" id="start-date" class="form-control form-control-sm mr-2" value="{{ request('start') }}" style="{{ request('range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
-                                                    <select id="sprint-select" name="sprints" class="custom-select custom-select-sm mr-2" style="{{ request('range')=='custom' ? 'display:inline-block;width:220px;' : 'display:none;width:220px;' }}">
-                                                        <option value="">-- Selecionar sprint --</option>
+                                                    <label class="mr-2">Sprints:</label>
+
+                                                    <select id="sprint-from" name="from" class="custom-select custom-select-sm mr-2" style="display:inline-block;width:220px;">
+                                                        <option value="">-- Sprint inicial --</option>
                                                         @if(isset($availableSprints) && is_array($availableSprints))
                                                             @foreach($availableSprints as $sp)
-                                                                <option value="{{ $sp['value'] }}" {{ request('sprints') == $sp['value'] ? 'selected' : '' }}>{{ $sp['label'] }}</option>
+                                                                <option value="{{ $sp['value'] }}" {{ (string)request('from') === (string)$sp['value'] ? 'selected' : '' }}>{{ $sp['label'] }}</option>
                                                             @endforeach
                                                         @endif
                                                     </select>
-                                                    <input type="date" name="end" id="end-date" class="form-control form-control-sm mr-2" value="{{ request('end') }}" style="display: none;">
+
+                                                    <select id="sprint-to" name="to" class="custom-select custom-select-sm mr-2" style="display:inline-block;width:220px;">
+                                                        <option value="">-- Sprint final --</option>
+                                                        @if(isset($availableSprints) && is_array($availableSprints))
+                                                            @foreach($availableSprints as $sp)
+                                                                <option value="{{ $sp['value'] }}" {{ (string)request('to') === (string)$sp['value'] ? 'selected' : '' }}>{{ $sp['label'] }}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+
                                                     <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
                                                 </form>
 
-                                                <!-- DEBUG: show detected sprints (temporary, moved near the filter) -->
-                                                <div id="sprint-debug" style="margin-top:6px;color:#cdd;">
-                                                    <small><strong>Debug:</strong> sprints detectadas: {{ isset($availableSprints) ? count($availableSprints) : 0 }}</small>
-                                                    <pre style="margin:4px 0 0;padding:6px;background:rgba(255,255,255,0.02);color:#ddd;border-radius:4px;max-height:120px;overflow:auto">@json(array_map(function($s){ return $s['label'] ?? $s; }, $availableSprints ?? []))</pre>
-                                                </div>
+                                              
 
                                                 <div id="spline_area" class="apex-charts" dir="ltr"></div>  
                                             </div>
@@ -532,94 +533,46 @@
 
                                     <div data-simplebar style="max-height:478px;">
                                         <ul class="list-unstyled activity-wid">
-                                            <li class="activity-list">
-                                                <div class="activity-icon avatar-xs">
-                                                    <span class="avatar-title bg-soft-primary text-primary rounded-circle">
-                                                        <i class="ri-check-fill"></i>
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div>
-                                                        <h5 class="font-size-13">23/09/2025   <small class="text-muted">14:20</small></h5>
-                                                    </div>
+                                            @if(isset($recentValidated) && count($recentValidated))
+                                                @foreach($recentValidated as $t)
+                                                    <li class="activity-list">
+                                                        <div class="activity-icon avatar-xs">
+                                                            <span class="avatar-title bg-soft-primary text-primary rounded-circle">
+                                                                <i class="ri-check-fill"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <div>
+                                                                @php $dt = \Carbon\Carbon::parse($t->created_at); @endphp
+                                                                <h5 class="font-size-13">{{ $dt->format('d/m/Y') }} <small class="text-muted">{{ $dt->format('H:i') }}</small></h5>
+                                                            </div>
 
-                                                    <div>
-                                                        <ul class="lista-custom">
-                                                            <li>Tarefa: 19979</li>
-                                                            <li>Dev: Kayo</li>
-                                                            <li>Projeto: Public</li>
-                                                            <li>Título da Tarefa: Gerar hash seguro em PHP para uso no sistema Laravel</li>
-                                                            <li><a href="https://redmine.pbsoft.com.br/issues/19979">Abrir tarefa no Redmine</a></li>
-                                                        </ul>
+                                                            <div>
+                                                                <ul class="lista-custom">
+                                                                    <li>Tarefa: {{ (int) $t->id }}</li>
+                                                                    <li>Dev: {{ $t->assigned_to ?? '-' }}</li>
+                                                                    <li>Projeto: {{ $t->project ?? '-' }}</li>
+                                                                    <li>Título da Tarefa: {{ $t->subject ?? '-' }}</li>
+                                                                    <li><a href="https://redmine.pbsoft.com.br/issues/{{ (int) $t->id }}" target="_blank" rel="noopener">Abrir tarefa no Redmine</a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            @else
+                                                <li class="activity-list">
+                                                    <div class="activity-icon avatar-xs">
+                                                        <span class="avatar-title bg-soft-secondary text-secondary rounded-circle">
+                                                            <i class="ri-time-line"></i>
+                                                        </span>
                                                     </div>
-                                                </div>
-                                            </li>
-                                            <li class="activity-list">
-                                                <div class="activity-icon avatar-xs">
-                                                    <span class="avatar-title bg-soft-primary text-primary rounded-circle">
-                                                        <i class="ri-check-fill"></i>
-                                                    </span>
-                                                </div>
-                                                <div>
                                                     <div>
-                                                        <h5 class="font-size-13">23/09/2025  <small class="text-muted">14:10</small></h5>
+                                                        <div>
+                                                            <h5 class="font-size-13">Sem validações recentes</h5>
+                                                        </div>
                                                     </div>
-
-                                                    <div>
-                                                        <ul class="lista-custom">
-                                                            <li>Tarefa: 20373</li>
-                                                            <li>Dev: Newton</li>
-                                                            <li>Projeto: Public</li>
-                                                            <li>Título da Tarefa: Incluir links de LGPD</li>
-                                                            <li><a href="https://redmine.pbsoft.com.br/issues/20373">Abrir tarefa no Redmine</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="activity-list">
-                                                <div class="activity-icon avatar-xs">
-                                                    <span class="avatar-title bg-soft-primary text-primary rounded-circle">
-                                                        <i class="ri-check-fill"></i>
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div>
-                                                        <h5 class="font-size-13">23/09/2025 <small class="text-muted">14:00</small></h5>
-                                                    </div>
-
-                                                    <div>
-                                                        <ul class="lista-custom">
-                                                            <li>Tarefa: 20496</li>
-                                                            <li>Dev: Kayo</li>
-                                                            <li>Projeto: Public</li>
-                                                            <li>Título da Tarefa: Correção do erro 404 no mapa do site</li>
-                                                            <li><a href="https://redmine.pbsoft.com.br/issues/20496">Abrir tarefa no Redmine</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li class="activity-list">
-                                                <div class="activity-icon avatar-xs">
-                                                    <span class="avatar-title bg-soft-primary text-primary rounded-circle">
-                                                        <i class="ri-check-fill"></i>
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div>
-                                                        <h5 class="font-size-13">23/09/2025 <small class="text-muted">13:45</small></h5>
-                                                    </div>
-
-                                                    <div>
-                                                        <ul class="lista-custom">
-                                                            <li>Tarefa: 20457</li>
-                                                            <li>Dev: Kayo</li>
-                                                            <li>Projeto: Circuito AD</li>
-                                                            <li>Título da Tarefa: Gerar um PWA da estrutura do CIRCUITO AD</li>
-                                                            <li><a href="https://redmine.pbsoft.com.br/issues/20457">Abrir tarefa no Redmine</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </li>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </div>
                                 </div>
@@ -916,10 +869,27 @@
                 if(range){ range.addEventListener('change', toggle); toggle(); }
             }
 
-            // Bind existing sprint filter (uses sprint-select)
-            bindToggle('range-select', { startId: 'start-date', endId: 'end-date', extraId: 'sprint-select' });
             // Bind top-projects filter (two date inputs)
             bindToggle('top-projects-range-select', { startId: 'top-projects-start-date', endId: 'top-projects-end-date' });
+
+            // Client-side validation for sprint range form: if both values are numeric and from>to, swap them
+            var sprintsForm = document.getElementById('sprints-filter-form');
+            if (sprintsForm) {
+                sprintsForm.addEventListener('submit', function(e){
+                    try {
+                        var f = this.querySelector('select[name="from"]');
+                        var t = this.querySelector('select[name="to"]');
+                        if (f && t && f.value && t.value) {
+                            var fi = parseInt(f.value,10);
+                            var ti = parseInt(t.value,10);
+                            if (!isNaN(fi) && !isNaN(ti) && fi > ti) {
+                                // swap to be user-friendly
+                                var tmp = f.value; f.value = t.value; t.value = tmp;
+                            }
+                        }
+                    } catch(err){ /* fail silently */ }
+                });
+            }
         })();
 
         // Donut chart is initialized by `assets/js/pages/dashboard.init.js`

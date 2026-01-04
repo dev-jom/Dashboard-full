@@ -236,6 +236,14 @@ class DashboardController extends Controller
             $availableSprints[] = ['value' => $num ?: $sp['label'], 'label' => $sp['label']];
         }
 
+        // Recent validated tickets: last 4 tickets with status 'Validado'
+        $recentValidated = DB::table('tickets_redmine')
+            ->select('id', 'assigned_to', 'project', 'subject', 'created_at')
+            ->where('status', 'Validado')
+            ->orderByDesc('created_at')
+            ->limit(4)
+            ->get();
+
         return view('dashboard', [
             'projetosMes' => $projetosMes,
             'projetosMesPrev' => $projetosMesPrev,
@@ -256,6 +264,7 @@ class DashboardController extends Controller
             'topProjectsPercentages' => $topProjectsPercentages ?? [],
             'topPeriodLabel' => $topPeriodLabel ?? null,
             'availableSprints' => $availableSprints,
+            'recentValidated' => $recentValidated ?? collect([]),
         ]);
     }
 
