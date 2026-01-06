@@ -349,7 +349,7 @@
                                         <div class="card">
                                             <div class="card-body">
 
-                                                <h4 class="card-title mb-4">Total Horas Estimadas x Horas Gastas (Por Usuário)</h4>
+                                                <h4 class="card-title mb-4">Total de Projetos por Usuário</h4>
 
                                                 <div class="row text-center">
                                                     <div class="col-4">
@@ -385,7 +385,7 @@
                                                 <form id="sprints-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
                                                     <label class="mr-2">Sprints:</label>
 
-                                                    <select id="sprint-from" name="from" class="custom-select custom-select-sm mr-2" style="display:inline-block;width:220px;">
+                                                    <select id="sprint-from" name="from" class="custom-select custom-select-sm mr-2" style="display:inline-block;">
                                                         <option value="">-- Sprint inicial --</option>
                                                         @if(isset($availableSprints) && is_array($availableSprints))
                                                             @foreach($availableSprints as $sp)
@@ -394,7 +394,7 @@
                                                         @endif
                                                     </select>
 
-                                                    <select id="sprint-to" name="to" class="custom-select custom-select-sm mr-2" style="display:inline-block;width:220px;">
+                                                    <select id="sprint-to" name="to" class="custom-select custom-select-sm mr-2" style="display:inline-block;">
                                                         <option value="">-- Sprint final --</option>
                                                         @if(isset($availableSprints) && is_array($availableSprints))
                                                             @foreach($availableSprints as $sp)
