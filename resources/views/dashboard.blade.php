@@ -349,25 +349,41 @@
                                         <div class="card">
                                             <div class="card-body">
 
-                                                <h4 class="card-title mb-4">Total de Projetos por Usuário</h4>
+                                                <h4 class="card-title mb-3">Total de Projetos por Usuário</h4>
 
-                                                <div class="row text-center">
-                                                    <div class="col-4">
-                                                        <h5 class="mb-0">9595</h5>
-                                                        <p class="text-muted text-truncate">Horas Estimadas</p>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <h5 class="mb-0">36524</h5>
-                                                        <p class="text-muted text-truncate">Horas Gastas</p>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <h5 class="mb-0">62541</h5>
-                                                        <p class="text-muted text-truncate"></p>
-                                                    </div>
-                                                </div>
+                                                <form id="dev-projects-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
+                                                    <label class="mr-2">Dev:</label>
+                                                    <select id="dev-select" name="dev" class="custom-select custom-select-sm mr-2">
+                                                        <option value="">-- Selecionar --</option>
+                                                        @if(isset($devs) && is_array($devs))
+                                                            @foreach($devs as $d)
+                                                                <option value="{{ $d }}" {{ (string)request('dev') === (string)$d ? 'selected' : '' }}>{{ $d }}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
 
-                                                <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center;">
-                                                    <canvas id="doughnut" style="width:100%; height:100%;"></canvas>
+                                                    <label class="mr-2">Período:</label>
+                                                    <select name="dev_range" id="dev-range-select" class="custom-select custom-select-sm mr-2">
+                                                        <option value="month" {{ request('dev_range','month')=='month' ? 'selected' : '' }}>Este mês</option>
+                                                        <option value="year" {{ request('dev_range')=='year' ? 'selected' : '' }}>Este ano</option>
+                                                        <option value="custom" {{ request('dev_range')=='custom' ? 'selected' : '' }}>Personalizado</option>
+                                                    </select>
+
+                                                    <input type="date" name="dev_start" id="dev-start-date" class="form-control form-control-sm mr-2" value="{{ request('dev_start') }}" style="{{ request('dev_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+                                                    <input type="date" name="dev_end" id="dev-end-date" class="form-control form-control-sm mr-2" value="{{ request('dev_end') }}" style="{{ request('dev_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+
+                                                    <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                                </form>
+
+                                                <!-- Summary columns removed: hours estimadas/gastas moved to modal only -->
+
+                                                <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center; position:relative;">
+                                                    <div id="doughnut-placeholder" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9aa0a6;">
+                                                        Selecione o filtro para visualizar o gráfico
+                                                    </div>
+                                                    <div id="doughnut-container" style="width:100%; height:100%; display:none;">
+                                                        <canvas id="doughnut" style="width:100%; height:100%;"></canvas>
+                                                    </div>
                                                 </div>
 
                                             </div>
@@ -756,6 +772,11 @@
         window.topProjectsCounts = @json($topProjectsCounts ?? []);
         window.topProjectsPercentages = @json($topProjectsPercentages ?? []);
         window.topPeriodLabel = @json($topPeriodLabel ?? null);
+        window.devList = @json($devs ?? []);
+        window.initialDev = @json(request('dev') ?? null);
+        window.initialDevRange = @json(request('dev_range', 'month'));
+        window.initialDevStart = @json(request('dev_start') ?? null);
+        window.initialDevEnd = @json(request('dev_end') ?? null);
     </script>
 
     <script src="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>

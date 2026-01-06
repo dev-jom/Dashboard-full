@@ -79,59 +79,187 @@ window.addEventListener('load', function(){
       return;
     }
 
-    var cardBody = canvas.closest('.card-body');
-    var summaryCols = cardBody ? cardBody.querySelectorAll('.row.text-center .col-4') : [];
-    var labels = [];
-    var data = [];
-    if (summaryCols && summaryCols.length) {
-      summaryCols.forEach(function(col){
-        var numEl = col.querySelector('h5');
-        var labelEl = col.querySelector('p');
-        var rawNum = numEl ? numEl.textContent.trim().replace(/[^0-9]/g,'') : '';
-        var value = rawNum === '' ? 0 : parseInt(rawNum,10);
-        data.push(value);
-        labels.push(labelEl ? labelEl.textContent.trim() : '—');
+    // helper to create or update the doughnut chart instance
+    function createOrUpdateDoughnut(labels, data) {
+      // ensure canvas fills its wrapper so Chart.js can compute sizes correctly
+      canvas.style.width = canvas.style.width || '100%';
+      canvas.style.height = canvas.style.height || '100%';
+      var ctx = canvas.getContext('2d');
+      if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
+      var colors = ['#5664d2','#ff3d60','#1cc88a','#f6c23e','#6c5ce7'];
+      canvas._chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels.length ? labels : ['Sem dados'],
+          datasets: [{
+            data: data.length ? data : [0],
+            backgroundColor: colors.slice(0, Math.max(1, labels.length || 1)),
+            hoverBackgroundColor: colors.slice(0, Math.max(1, labels.length || 1)),
+            hoverBorderColor: '#fff'
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          legend: { position: 'bottom' },
+          cutoutPercentage: 60,
+          tooltips: { callbacks: { label: function(tooltipItem, data){
+            var d = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
+            return data.labels[tooltipItem.index] + ': ' + d.toLocaleString();
+          } } }
+        }
       });
-      // Limit the number of slices (useful when the HTML shows more summary cols)
-      // Set window.doughnutDesiredCount from server or console to override.
-      var desiredCount = (window.doughnutDesiredCount && Number(window.doughnutDesiredCount)) || 2;
-      if (labels.length > desiredCount) {
-        labels = labels.slice(0, desiredCount);
-        data = data.slice(0, desiredCount);
-      }
-    } else {
-      labels = ['Activated','Pending'];
-      data = [9595,36524];
+      // show chart container and hide placeholder
+      try {
+        var containerEl = document.getElementById('doughnut-container');
+        var placeholderEl = document.getElementById('doughnut-placeholder');
+        if (containerEl) containerEl.style.display = 'block';
+        if (placeholderEl) placeholderEl.style.display = 'none';
+      } catch (e) {}
+
+      // attach last data so click handler can access counts
+      canvas._lastData = { labels: labels.slice(), counts: data.slice() };
+
+      // attach click handler to open modal with details
+      try {
+        canvas.onclick = function(evt) {
+          try {
+            if (!canvas._chartInstance) return;
+            var active = canvas._chartInstance.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+            if (!active || !active.length) return;
+            var idx = active[0].index;
+            var d = canvas._lastData || {};
+            var project = (d.labels && d.labels[idx]) ? d.labels[idx] : '—';
+            var value = (d.counts && d.counts[idx]) ? d.counts[idx] : 0;
+
+            document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
+            document.getElementById('modalProject').textContent = project;
+            document.getElementById('modalValue').textContent = value;
+            var details = 'Atividades: ' + value;
+            document.getElementById('modalDetails').textContent = details;
+
+            var modalElement = document.getElementById('donutModal');
+            if (modalElement) {
+              var modal = new bootstrap.Modal(modalElement);
+              modal.show();
+            }
+          } catch (err) { console.warn('donut click handler error', err); }
+        };
+      } catch (e) { /* ignore if bootstrap or Chart not available */ }
     }
 
-    // ensure canvas fills its wrapper so Chart.js can compute sizes correctly
-    canvas.style.width = canvas.style.width || '100%';
-    canvas.style.height = canvas.style.height || '100%';
-    var ctx = canvas.getContext('2d');
-    if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
+    // Fetch data from API and update chart
+    async function fetchAndUpdate(dev, range, start, end) {
+      try {
+        if (!dev) {
+          // no dev selected — hide chart and show placeholder
+          try {
+            var containerEl = document.getElementById('doughnut-container');
+            var placeholderEl = document.getElementById('doughnut-placeholder');
+            if (containerEl) containerEl.style.display = 'none';
+            if (placeholderEl) {
+              placeholderEl.style.display = 'flex';
+              placeholderEl.textContent = 'Selecione o filtro para visualizar o gráfico';
+            }
+          } catch (e) {}
+          return;
+        }
 
-    var doughnutChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: ['#5664d2','#ff3d60'],
-          hoverBackgroundColor: ['#5664d2','#ff3d60'],
-          hoverBorderColor: '#fff'
-        }]
-      },
-      options: {
-        maintainAspectRatio: false,
-        legend: { position: 'bottom' },
-        cutoutPercentage: 60,
-        tooltips: { callbacks: { label: function(tooltipItem, data){
-          var d = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
-          return data.labels[tooltipItem.index] + ': ' + d.toLocaleString();
-        } } }
+        var qs = '?dev=' + encodeURIComponent(dev) + '&range=' + encodeURIComponent(range || 'month');
+        if (range === 'custom') {
+          if (start) qs += '&start=' + encodeURIComponent(start);
+          if (end) qs += '&end=' + encodeURIComponent(end);
+        }
+        var res = await fetch('/api/dashboard/projects-by-dev' + qs);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var json = await res.json();
+        var labels = json.labels || [];
+        var counts = json.counts || json.count || json.counts || [];
+        // ensure numeric arrays
+        counts = Array.isArray(counts) ? counts.map(function(v){ return Number(v)||0; }) : [];
+
+        // update the chart with projects (labels) and counts
+        createOrUpdateDoughnut(labels, counts);
+        try { if (canvas) canvas._lastData = { labels: labels.slice(), counts: counts.slice() }; } catch(e){}
+      } catch (e) {
+        console.warn('Error fetching projects-by-dev:', e);
+        try {
+          var containerEl = document.getElementById('doughnut-container');
+          var placeholderEl = document.getElementById('doughnut-placeholder');
+          if (containerEl) containerEl.style.display = 'none';
+          if (placeholderEl) placeholderEl.style.display = 'flex';
+          if (placeholderEl) placeholderEl.textContent = 'Erro ao carregar o gráfico';
+        } catch(err){}
       }
-    });
-    canvas._chartInstance = doughnutChart;
+    }
+
+    // Wire the filter form (if present)
+    var form = document.getElementById('dev-projects-filter-form');
+    if (form) {
+      var devSelect = document.getElementById('dev-select');
+      var rangeSelect = document.getElementById('dev-range-select');
+      var startInput = document.getElementById('dev-start-date');
+      var endInput = document.getElementById('dev-end-date');
+
+      function toggleCustom() {
+        if (!rangeSelect) return;
+        if (rangeSelect.value === 'custom') {
+          if (startInput) startInput.style.display = 'inline-block';
+          if (endInput) endInput.style.display = 'inline-block';
+        } else {
+          if (startInput) startInput.style.display = 'none';
+          if (endInput) endInput.style.display = 'none';
+        }
+      }
+      rangeSelect && rangeSelect.addEventListener('change', toggleCustom);
+      toggleCustom();
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var dev = devSelect ? devSelect.value : null;
+        var range = rangeSelect ? rangeSelect.value : 'month';
+        var start = startInput ? startInput.value : null;
+        var end = endInput ? endInput.value : null;
+        fetchAndUpdate(dev, range, start, end);
+        // update URL query params without reloading so back/refresh keep state
+        try {
+          var url = new URL(window.location.href);
+          if (dev) url.searchParams.set('dev', dev); else url.searchParams.delete('dev');
+          url.searchParams.set('dev_range', range);
+          if (start) url.searchParams.set('dev_start', start); else url.searchParams.delete('dev_start');
+          if (end) url.searchParams.set('dev_end', end); else url.searchParams.delete('dev_end');
+          window.history.replaceState({}, '', url.toString());
+        } catch(err) { /* ignore */ }
+      });
+
+      // initial load: prefer window.initialDev or first option
+      var initialDev = (typeof window.initialDev !== 'undefined' && window.initialDev) ? window.initialDev : (window.devList && window.devList.length ? window.devList[0] : (devSelect ? devSelect.value : null));
+      if (devSelect && initialDev) devSelect.value = initialDev;
+      var initialRange = (typeof window.initialDevRange !== 'undefined') ? window.initialDevRange : (rangeSelect ? rangeSelect.value : 'month');
+      if (rangeSelect) rangeSelect.value = initialRange;
+      if (startInput && window.initialDevStart) startInput.value = window.initialDevStart;
+      if (endInput && window.initialDevEnd) endInput.value = window.initialDevEnd;
+
+      fetchAndUpdate(devSelect ? devSelect.value : initialDev, rangeSelect ? rangeSelect.value : initialRange, startInput ? startInput.value : null, endInput ? endInput.value : null);
+    } else {
+      // No filter form — fallback to previous static summary parsing
+      var cardBody = canvas.closest('.card-body');
+      var summaryCols = cardBody ? cardBody.querySelectorAll('.row.text-center .col-4') : [];
+      var labels = [];
+      var data = [];
+      if (summaryCols && summaryCols.length) {
+        summaryCols.forEach(function(col){
+          var numEl = col.querySelector('h5');
+          var labelEl = col.querySelector('p');
+          var rawNum = numEl ? numEl.textContent.trim().replace(/[^0-9]/g,'') : '';
+          var value = rawNum === '' ? 0 : parseInt(rawNum,10);
+          data.push(value);
+          labels.push(labelEl ? labelEl.textContent.trim() : '—');
+        });
+      } else {
+        labels = ['Activated','Pending']; data = [9595,36524];
+      }
+      createOrUpdateDoughnut(labels, data);
+    }
   } catch (e) {
     console.error('Error initializing doughnut chart (projects):', e);
   }

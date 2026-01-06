@@ -251,6 +251,15 @@ class DashboardController extends Controller
             ->limit(50)
             ->get();
 
+        // List of developers (assigned_to) for filter UI
+        $devs = DB::table('tickets_redmine')
+            ->select('assigned_to')
+            ->whereNotNull('assigned_to')
+            ->distinct()
+            ->orderBy('assigned_to')
+            ->pluck('assigned_to')
+            ->toArray();
+
         return view('dashboard', [
             'projetosMes' => $projetosMes,
             'projetosMesPrev' => $projetosMesPrev,
@@ -273,6 +282,59 @@ class DashboardController extends Controller
             'availableSprints' => $availableSprints,
             'recentValidated' => $recentValidated ?? collect([]),
             'recentTasks' => $recentTasks ?? collect([]),
+            'devs' => $devs ?? [],
+        ]);
+    }
+
+    /**
+     * API: return projects and counts for a given developer and period.
+     * Query params: dev (string), range (month|year|custom), start, end
+     */
+    public function projectsByDev(Request $request)
+    {
+        $dev = $request->query('dev');
+        if (!$dev) {
+            return response()->json(['labels' => [], 'counts' => []]);
+        }
+
+        $now = Carbon::now();
+        $range = $request->query('range', 'month');
+        if ($range === 'year') {
+            $periodStart = $now->copy()->startOfYear();
+            $periodEnd = $now->copy()->endOfYear();
+        } elseif ($range === 'custom') {
+            $startStr = $request->query('start');
+            $endStr = $request->query('end');
+            try {
+                $periodStart = $startStr ? Carbon::parse($startStr)->startOfDay() : $now->copy()->startOfMonth();
+            } catch (\Exception $e) {
+                $periodStart = $now->copy()->startOfMonth();
+            }
+            try {
+                $periodEnd = $endStr ? Carbon::parse($endStr)->endOfDay() : $now->copy()->endOfMonth();
+            } catch (\Exception $e) {
+                $periodEnd = $now->copy()->endOfMonth();
+            }
+        } else {
+            $periodStart = $now->copy()->startOfMonth();
+            $periodEnd = $now->copy()->endOfMonth();
+        }
+
+        // Return only projects and counts (each project becomes a donut slice)
+        $query = DB::table('tickets_redmine')
+            ->select('project', DB::raw('count(*) as activities'))
+            ->where('assigned_to', $dev)
+            ->whereBetween('created_at', [$periodStart->startOfDay(), $periodEnd->endOfDay()])
+            ->groupBy('project')
+            ->orderByDesc('activities')
+            ->get();
+
+        $labels = $query->pluck('project')->toArray();
+        $counts = $query->pluck('activities')->toArray();
+
+        return response()->json([
+            'labels' => $labels,
+            'counts' => $counts,
         ]);
     }
 

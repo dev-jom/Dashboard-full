@@ -24,3 +24,5 @@ Route::prefix('api')->group(function () {
 
 // API route used by dashboard spline area chart
 Route::get('api/dashboard/sprints-tasks', [\App\Http\Controllers\DashboardController::class, 'sprintsTasks']);
+// API: projects by developer (used by dashboard doughnut)
+Route::get('api/dashboard/projects-by-dev', [\App\Http\Controllers\DashboardController::class, 'projectsByDev']);
