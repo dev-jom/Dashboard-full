@@ -72,85 +72,111 @@
 // Initialize Doughnut Chart on projects dashboard if canvas exists
 window.addEventListener('load', function(){
   try {
-    var canvas = document.getElementById('doughnut');
-    if (!canvas) return;
-    if (typeof Chart === 'undefined') {
-      console.warn('Chart.js not available yet — doughnut will initialize on next load.');
+    var container = document.getElementById('doughnut');
+    if (!container) return;
+    if (typeof ApexCharts === 'undefined') {
+      console.warn('ApexCharts not available — doughnut will initialize on next load.');
       return;
     }
 
-    // helper to create or update the doughnut chart instance
+    var doughnutChartInstance = null;
+
     function createOrUpdateDoughnut(labels, data) {
-      // ensure canvas fills its wrapper so Chart.js can compute sizes correctly
-      canvas.style.width = canvas.style.width || '100%';
-      canvas.style.height = canvas.style.height || '100%';
-      var ctx = canvas.getContext('2d');
-      if (canvas._chartInstance) { canvas._chartInstance.destroy(); }
-      var colors = ['#5664d2','#ff3d60','#1cc88a','#f6c23e','#6c5ce7'];
-      canvas._chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels.length ? labels : ['Sem dados'],
-          datasets: [{
-            data: data.length ? data : [0],
-            backgroundColor: colors.slice(0, Math.max(1, labels.length || 1)),
-            hoverBackgroundColor: colors.slice(0, Math.max(1, labels.length || 1)),
-            hoverBorderColor: '#fff'
-          }]
-        },
-        options: {
-          maintainAspectRatio: false,
-          legend: { position: 'bottom' },
-          cutoutPercentage: 60,
-          tooltips: { callbacks: { label: function(tooltipItem, data){
-            var d = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || 0;
-            return data.labels[tooltipItem.index] + ': ' + d.toLocaleString();
-          } } }
+      try {
+        if (doughnutChartInstance) {
+          try { doughnutChartInstance.destroy(); } catch(e){}
+          doughnutChartInstance = null;
         }
-      });
-      // show chart container and hide placeholder
-      try {
-        var containerEl = document.getElementById('doughnut-container');
-        var placeholderEl = document.getElementById('doughnut-placeholder');
-        if (containerEl) containerEl.style.display = 'block';
-        if (placeholderEl) placeholderEl.style.display = 'none';
-      } catch (e) {}
 
-      // attach last data so click handler can access counts
-      canvas._lastData = { labels: labels.slice(), counts: data.slice() };
+        var colors = ['#5664d2','#ff3d60','#1cc88a','#f6c23e','#6c5ce7'];
+        var opts = {
+          chart: {
+            height: '100%',
+            type: 'donut',
+            events: {
+              dataPointSelection: function(event, chartContext, config) {
+                var idx = config && typeof config.dataPointIndex !== 'undefined' ? config.dataPointIndex : null;
+                if (idx === null) return;
+                var project = (labels && labels[idx]) ? labels[idx] : '—';
+                var value = (data && data[idx]) ? data[idx] : 0;
 
-      // attach click handler to open modal with details
-      try {
-        canvas.onclick = function(evt) {
-          try {
-            if (!canvas._chartInstance) return;
-            var active = canvas._chartInstance.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
-            if (!active || !active.length) return;
-            var idx = active[0].index;
-            var d = canvas._lastData || {};
-            var project = (d.labels && d.labels[idx]) ? d.labels[idx] : '—';
-            var value = (d.counts && d.counts[idx]) ? d.counts[idx] : 0;
+                document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
+                document.getElementById('modalProject').textContent = project;
+                document.getElementById('modalValue').textContent = value;
+                var details = 'Atividades: ' + value;
+                if (window.topProjectsPercentages && window.topProjectsPercentages[idx] !== undefined) {
+                  details += ' — ' + window.topProjectsPercentages[idx] + ' % do período';
+                }
+                document.getElementById('modalDetails').textContent = details;
 
-            document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
-            document.getElementById('modalProject').textContent = project;
-            document.getElementById('modalValue').textContent = value;
-            var details = 'Atividades: ' + value;
-            document.getElementById('modalDetails').textContent = details;
-
-            var modalElement = document.getElementById('donutModal');
-            if (modalElement) {
-              var modal = new bootstrap.Modal(modalElement);
-              modal.show();
+                var modalElement = document.getElementById('donutModal');
+                if (modalElement) { var modal = new bootstrap.Modal(modalElement); modal.show(); }
+              }
             }
-          } catch (err) { console.warn('donut click handler error', err); }
+          },
+          stroke: { show: false },
+          labels: labels.length ? labels : ['Sem dados'],
+          series: data.length ? data : [0],
+          plotOptions: { pie: { donut: { size: '75%' }, customScale: 0.9 } },
+          dataLabels: { enabled: false },
+          legend: { show: false },
+          colors: colors,
+          tooltip: { y: { formatter: function(val){ return (val || 0) + ' atividades'; } } }
         };
-      } catch (e) { /* ignore if bootstrap or Chart not available */ }
+
+        doughnutChartInstance = new ApexCharts(container, opts);
+        doughnutChartInstance.render().then(function(){
+          try {
+            var colorsUsed = (doughnutChartInstance.w && doughnutChartInstance.w.config && doughnutChartInstance.w.config.colors) ? doughnutChartInstance.w.config.colors : opts.colors;
+            // sync color of any existing mdi dots (defensive)
+            try {
+              var cardBody = container.closest('.card-body');
+              var legendContainerOld = cardBody ? cardBody.querySelector('.row') : null;
+              if (legendContainerOld) {
+                var legendDots = legendContainerOld.querySelectorAll('.mdi-circle');
+                legendDots.forEach(function(dot, idx){
+                  dot.classList.remove('text-info','text-danger','text-warning','text-primary','text-success');
+                  if (colorsUsed && colorsUsed[idx]) { dot.style.color = colorsUsed[idx]; }
+                });
+              }
+            } catch(e){}
+
+            // populate the new HTML legend under the doughnut (doughnut-legend)
+            try {
+              var legendEl = document.getElementById('doughnut-legend');
+              if (legendEl) {
+                var labelEls = legendEl.querySelectorAll('.legend-label');
+                var pctEls = legendEl.querySelectorAll('.legend-percent');
+                var dotEls = legendEl.querySelectorAll('.legend-dot');
+                var total = 0;
+                try { total = (data && data.length) ? data.reduce(function(a,b){ return a + (Number(b)||0); }, 0) : 0; } catch(e){ total = 0; }
+                for (var i = 0; i < 3; i++) {
+                  var lab = labels && labels[i] ? labels[i] : '-';
+                  var val = data && (typeof data[i] !== 'undefined') ? Number(data[i]) : 0;
+                  var pct = (total > 0) ? ((val / total) * 100).toFixed(1) + ' %' : '-';
+                  if (labelEls[i]) labelEls[i].textContent = lab;
+                  if (pctEls[i]) pctEls[i].textContent = (pct === 'NaN %' ? '-' : pct);
+                  if (dotEls[i]) {
+                    // clear existing bootstrap color utils and set inline color to match slice
+                    dotEls[i].classList.remove('text-info','text-danger','text-warning','text-primary','text-success');
+                    if (colorsUsed && colorsUsed[i]) dotEls[i].style.color = colorsUsed[i];
+                    else dotEls[i].style.color = '';
+                  }
+                }
+              }
+            } catch(e) { console.warn('Could not populate doughnut legend:', e); }
+
+          } catch (e) { console.warn('Could not sync doughnut legend colors:', e); }
+        });
+
+        // store last data for external access
+        try { container._lastData = { labels: labels.slice(), counts: data.slice() }; } catch(e){}
+      } catch(e) { console.warn('createOrUpdateDoughnut error', e); }
     }
 
     // Fetch data from API and update chart
     async function fetchAndUpdate(dev, range, start, end) {
       try {
-        // build querystring; do not require `dev` — when missing, API should return aggregate data
         var qs = '?';
         if (dev) qs += 'dev=' + encodeURIComponent(dev) + '&';
         qs += 'range=' + encodeURIComponent(range || 'month');
@@ -163,21 +189,13 @@ window.addEventListener('load', function(){
         var json = await res.json();
         var labels = json.labels || [];
         var counts = json.counts || json.count || json.counts || [];
-        // ensure numeric arrays
         counts = Array.isArray(counts) ? counts.map(function(v){ return Number(v)||0; }) : [];
 
-        // update the chart with projects (labels) and counts
         createOrUpdateDoughnut(labels, counts);
-        try { if (canvas) canvas._lastData = { labels: labels.slice(), counts: counts.slice() }; } catch(e){}
+        try { container._lastData = { labels: labels.slice(), counts: counts.slice() }; } catch(e){}
       } catch (e) {
         console.warn('Error fetching projects-by-dev:', e);
-        try {
-          var containerEl = document.getElementById('doughnut-container');
-          var placeholderEl = document.getElementById('doughnut-placeholder');
-          if (containerEl) containerEl.style.display = 'none';
-          if (placeholderEl) placeholderEl.style.display = 'flex';
-          if (placeholderEl) placeholderEl.textContent = 'Erro ao carregar o gráfico';
-        } catch(err){}
+        try { container.innerHTML = '<div style="padding:20px;text-align:center;color:#d9534f">Erro ao carregar o gráfico</div>'; } catch(err){}
       }
     }
 
@@ -209,7 +227,6 @@ window.addEventListener('load', function(){
         var start = startInput ? startInput.value : null;
         var end = endInput ? endInput.value : null;
         fetchAndUpdate(dev, range, start, end);
-        // update URL query params without reloading so back/refresh keep state
         try {
           var url = new URL(window.location.href);
           if (dev) url.searchParams.set('dev', dev); else url.searchParams.delete('dev');
@@ -217,10 +234,9 @@ window.addEventListener('load', function(){
           if (start) url.searchParams.set('dev_start', start); else url.searchParams.delete('dev_start');
           if (end) url.searchParams.set('dev_end', end); else url.searchParams.delete('dev_end');
           window.history.replaceState({}, '', url.toString());
-        } catch(err) { /* ignore */ }
+        } catch(err) {}
       });
 
-      // initial load: prefer window.initialDev, otherwise pick first non-empty option from select
       var initialDev = null;
       if (typeof window.initialDev !== 'undefined' && window.initialDev) {
         initialDev = window.initialDev;
@@ -242,7 +258,7 @@ window.addEventListener('load', function(){
       fetchAndUpdate(devSelect ? devSelect.value : initialDev, rangeSelect ? rangeSelect.value : initialRange, startInput ? startInput.value : null, endInput ? endInput.value : null);
     } else {
       // No filter form — fallback to previous static summary parsing
-      var cardBody = canvas.closest('.card-body');
+      var cardBody = container.closest('.card-body');
       var summaryCols = cardBody ? cardBody.querySelectorAll('.row.text-center .col-4') : [];
       var labels = [];
       var data = [];

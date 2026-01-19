@@ -380,9 +380,31 @@
                                                 <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center; position:relative;">
                                                     <!-- placeholder removed so chart starts visible by default -->
                                                     <div id="doughnut-container" style="width:100%; height:100%; display:block;">
-                                                        <canvas id="doughnut" style="width:100%; height:100%;"></canvas>
-                                                    </div>
-                                                </div>
+                                                        <div id="doughnut" class="apex-charts" style="width:100%; height:100%;"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Legend for Total de Projetos por Usuário (will be populated by JS) -->
+                                                        <div class="row" id="doughnut-legend">
+                                                            <div class="col-4">
+                                                                <div class="text-center mt-4">
+                                                                    <p class="mb-2 text-truncate"><i class="mdi mdi-circle legend-dot font-size-10 mr-1"></i> <span class="legend-label">-</span></p>
+                                                                    <h5 class="legend-percent">-</h5>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="text-center mt-4">
+                                                                    <p class="mb-2 text-truncate"><i class="mdi mdi-circle legend-dot font-size-10 mr-1"></i> <span class="legend-label">-</span></p>
+                                                                    <h5 class="legend-percent">-</h5>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <div class="text-center mt-4">
+                                                                    <p class="mb-2 text-truncate"><i class="mdi mdi-circle legend-dot font-size-10 mr-1"></i> <span class="legend-label">-</span></p>
+                                                                    <h5 class="legend-percent">-</h5>
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
                                             </div>
                                         </div>
