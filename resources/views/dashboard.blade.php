@@ -378,10 +378,8 @@
                                                 <!-- Summary columns removed: hours estimadas/gastas moved to modal only -->
 
                                                 <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center; position:relative;">
-                                                    <div id="doughnut-placeholder" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9aa0a6;">
-                                                        Selecione o filtro para visualizar o gráfico
-                                                    </div>
-                                                    <div id="doughnut-container" style="width:100%; height:100%; display:none;">
+                                                    <!-- placeholder removed so chart starts visible by default -->
+                                                    <div id="doughnut-container" style="width:100%; height:100%; display:block;">
                                                         <canvas id="doughnut" style="width:100%; height:100%;"></canvas>
                                                     </div>
                                                 </div>

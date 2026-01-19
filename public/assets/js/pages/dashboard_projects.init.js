@@ -150,21 +150,10 @@ window.addEventListener('load', function(){
     // Fetch data from API and update chart
     async function fetchAndUpdate(dev, range, start, end) {
       try {
-        if (!dev) {
-          // no dev selected — hide chart and show placeholder
-          try {
-            var containerEl = document.getElementById('doughnut-container');
-            var placeholderEl = document.getElementById('doughnut-placeholder');
-            if (containerEl) containerEl.style.display = 'none';
-            if (placeholderEl) {
-              placeholderEl.style.display = 'flex';
-              placeholderEl.textContent = 'Selecione o filtro para visualizar o gráfico';
-            }
-          } catch (e) {}
-          return;
-        }
-
-        var qs = '?dev=' + encodeURIComponent(dev) + '&range=' + encodeURIComponent(range || 'month');
+        // build querystring; do not require `dev` — when missing, API should return aggregate data
+        var qs = '?';
+        if (dev) qs += 'dev=' + encodeURIComponent(dev) + '&';
+        qs += 'range=' + encodeURIComponent(range || 'month');
         if (range === 'custom') {
           if (start) qs += '&start=' + encodeURIComponent(start);
           if (end) qs += '&end=' + encodeURIComponent(end);
@@ -231,8 +220,19 @@ window.addEventListener('load', function(){
         } catch(err) { /* ignore */ }
       });
 
-      // initial load: prefer window.initialDev or first option
-      var initialDev = (typeof window.initialDev !== 'undefined' && window.initialDev) ? window.initialDev : (window.devList && window.devList.length ? window.devList[0] : (devSelect ? devSelect.value : null));
+      // initial load: prefer window.initialDev, otherwise pick first non-empty option from select
+      var initialDev = null;
+      if (typeof window.initialDev !== 'undefined' && window.initialDev) {
+        initialDev = window.initialDev;
+      } else if (devSelect) {
+        for (var i = 0; i < devSelect.options.length; i++) {
+          var opt = devSelect.options[i];
+          if (opt && opt.value && opt.value.toString().trim() !== '') { initialDev = opt.value; break; }
+        }
+        if (!initialDev) initialDev = devSelect.value || null;
+      } else if (window.devList && window.devList.length) {
+        initialDev = window.devList[0];
+      }
       if (devSelect && initialDev) devSelect.value = initialDev;
       var initialRange = (typeof window.initialDevRange !== 'undefined') ? window.initialDevRange : (rangeSelect ? rangeSelect.value : 'month');
       if (rangeSelect) rangeSelect.value = initialRange;
