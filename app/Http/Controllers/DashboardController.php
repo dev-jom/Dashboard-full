@@ -260,6 +260,15 @@ class DashboardController extends Controller
             ->pluck('assigned_to')
             ->toArray();
 
+        // List of projects for the 'Situação por projeto' filter
+        $projectsList = DB::table('tickets_redmine')
+            ->select('project')
+            ->whereNotNull('project')
+            ->distinct()
+            ->orderBy('project')
+            ->pluck('project')
+            ->toArray();
+
         return view('dashboard', [
             'projetosMes' => $projetosMes,
             'projetosMesPrev' => $projetosMesPrev,
@@ -283,7 +292,53 @@ class DashboardController extends Controller
             'recentValidated' => $recentValidated ?? collect([]),
             'recentTasks' => $recentTasks ?? collect([]),
             'devs' => $devs ?? [],
+            'projectsList' => $projectsList ?? [],
         ]);
+    }
+
+    /**
+     * API: return status distribution for a single project in a given period.
+     * Query params: project (required), range (month|year|custom), start, end
+     */
+    public function projectStatuses(Request $request)
+    {
+        $project = $request->query('project');
+        if (!$project) {
+            return response()->json(['labels' => [], 'counts' => []]);
+        }
+
+        $now = Carbon::now();
+        $range = $request->query('range', 'month');
+        if ($range === 'year') {
+            $periodStart = $now->copy()->startOfYear();
+            $periodEnd = $now->copy()->endOfYear();
+        } elseif ($range === 'custom') {
+            $startStr = $request->query('start');
+            $endStr = $request->query('end');
+            try { $periodStart = $startStr ? Carbon::parse($startStr)->startOfDay() : $now->copy()->startOfMonth(); } catch (\Exception $e) { $periodStart = $now->copy()->startOfMonth(); }
+            try { $periodEnd = $endStr ? Carbon::parse($endStr)->endOfDay() : $now->copy()->endOfMonth(); } catch (\Exception $e) { $periodEnd = $now->copy()->endOfMonth(); }
+        } else {
+            $periodStart = $now->copy()->startOfMonth();
+            $periodEnd = $now->copy()->endOfMonth();
+        }
+
+        $query = DB::table('tickets_redmine')
+            ->select('status', DB::raw('count(*) as cnt'))
+            ->where('project', $project)
+            ->whereBetween('created_at', [$periodStart->startOfDay(), $periodEnd->endOfDay()])
+            ->groupBy('status')
+            ->orderByDesc('cnt')
+            ->get();
+
+        $labels = $query->pluck('status')->map(function($v){ return $v ?: '—'; })->toArray();
+        $counts = $query->pluck('cnt')->map(function($v){ return (int)$v; })->toArray();
+
+        // Provide percentages too
+        $total = array_sum($counts);
+        $percentages = [];
+        foreach ($counts as $c) { $percentages[] = $total > 0 ? round(($c / $total) * 100, 1) : 0; }
+
+        return response()->json([ 'labels' => $labels, 'counts' => $counts, 'percentages' => $percentages, 'total' => $total ]);
     }
 
     /**

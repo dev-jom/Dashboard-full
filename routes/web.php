@@ -20,6 +20,8 @@ Route::prefix('api')->group(function () {
     Route::get('/tests/sprints', [DashboardTesteApiController::class, 'sprints']);
     Route::get('/devs/activities-count', [DashboardTesteApiController::class, 'devActivitiesCount']);
     Route::get('/structures/tests-count', [DashboardTesteApiController::class, 'structuresTestsCount']);
+    // Project status distribution for selected project and period
+    Route::get('/dashboard/project-statuses', [\App\Http\Controllers\DashboardController::class, 'projectStatuses']);
 });
 
 // API route used by dashboard spline area chart

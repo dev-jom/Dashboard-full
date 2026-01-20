@@ -514,7 +514,32 @@
                                     <div class="dropdown float-right">
                                     </div>
 
-                                    <h4 class="card-title mb-4">% Projetos em variados ambientes</h4>
+                                    <h4 class="card-title mb-4">Situação por projeto</h4>
+                                    <!-- Filter: project + period -->
+                                    <form id="project-status-filter-form" class="form-inline mb-3" method="get" action="{{ route('dashboard') }}">
+                                        <label class="mr-2">Projeto:</label>
+                                        <select id="project-select" name="project" class="custom-select custom-select-sm mr-2">
+                                            <option value="">-- Selecionar projeto --</option>
+                                            @if(isset($projectsList) && is_array($projectsList))
+                                                @foreach($projectsList as $p)
+                                                    <option value="{{ $p }}" {{ (string)request('project') === (string)$p || (empty(request('project')) && $loop->first) ? 'selected' : '' }}>{{ $p }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+
+                                        <label class="mr-2">Período:</label>
+                                        <select name="project_range" id="project-range-select" class="custom-select custom-select-sm mr-2">
+                                            <option value="month" {{ request('project_range','month')=='month' ? 'selected' : '' }}>Este mês</option>
+                                            <option value="year" {{ request('project_range')=='year' ? 'selected' : '' }}>Este ano</option>
+                                            <option value="custom" {{ request('project_range')=='custom' ? 'selected' : '' }}>Personalizado</option>
+                                        </select>
+
+                                        <input type="date" name="project_start" id="project-start-date" class="form-control form-control-sm mr-2" value="{{ request('project_start') }}" style="{{ request('project_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+                                        <input type="date" name="project_end" id="project-end-date" class="form-control form-control-sm mr-2" value="{{ request('project_end') }}" style="{{ request('project_range')=='custom' ? 'display:inline-block;' : 'display:none;' }}">
+
+                                        <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+                                    </form>
+
                                     <div class="text-center">
                                         <div class="row">
                                             <div class="col-sm-4">
@@ -523,8 +548,8 @@
                                                         <div id="radialchart-1" class="apex-charts"></div>
                                                     </div>
 
-                                                    <p class="text-muted text-truncate mb-2">Mobile</p>
-                                                    <h5 class="mb-0">20%</h5>
+                                                    <p class="text-muted text-truncate mb-2 status-label">-</p>
+                                                    <h5 class="mb-0 status-value">-</h5>
                                                 </div>
                                             </div>
 
@@ -534,8 +559,8 @@
                                                         <div id="radialchart-2" class="apex-charts"></div>
                                                     </div>
 
-                                                    <p class="text-muted text-truncate mb-2">Public</p>
-                                                    <h5 class="mb-0">80%</h5>
+                                                    <p class="text-muted text-truncate mb-2 status-label">-</p>
+                                                    <h5 class="mb-0 status-value">-</h5>
                                                 </div>
                                             </div>
 
@@ -545,14 +570,16 @@
                                                         <div id="radialchart-3" class="apex-charts"></div>
                                                     </div>
 
-                                                    <p class="text-muted text-truncate mb-2">Website</p>
-                                                    <h5 class="mb-0">30%</h5>
+                                                    <p class="text-muted text-truncate mb-2 status-label">-</p>
+                                                    <h5 class="mb-0 status-value">-</h5>
                                                 </div>
                                             </div>
 
                                         </div>
 
                                     </div>
+                                    <!-- Hover tooltip for status slices -->
+                                    <div id="project-status-tooltip" style="position:absolute;display:none;z-index:1050;padding:8px 12px;border-radius:8px;background:#3aa0ff;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:13px;pointer-events:none;">-</div>
                                 </div>
                             </div>
                         </div>
@@ -797,6 +824,13 @@
         window.initialDevRange = @json(request('dev_range', 'month'));
         window.initialDevStart = @json(request('dev_start') ?? null);
         window.initialDevEnd = @json(request('dev_end') ?? null);
+
+        // Project status filter initial values
+        window.projectsList = @json($projectsList ?? []);
+        window.initialProject = @json(request('project') ?? null);
+        window.initialProjectRange = @json(request('project_range', 'month'));
+        window.initialProjectStart = @json(request('project_start') ?? null);
+        window.initialProjectEnd = @json(request('project_end') ?? null);
     </script>
 
     <script src="assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js"></script>
