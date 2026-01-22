@@ -810,9 +810,9 @@ try {
         var splineAreaEl = document.querySelector('#spline_area');
         if (splineAreaEl) {
             var splineAreaOptions = {
-                chart: { height: 373, type: 'area' },
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth', width: 3 },
+                chart: { height: 500, type: 'area' },
+                dataLabels: { enabled: true },
+                stroke: { curve: 'smooth', width: 10 },
                 series: [
                     // Alinhar quantidade de pontos às 4 sprints
                     { name: 'Criadas', data: [34, 40, 28, 52] },
@@ -829,7 +829,7 @@ try {
                     ]
                 },
                 grid: { borderColor: '#f1f1f1', padding: { bottom: 15 } },
-                tooltip: { x: { show: false } },
+                tooltip: { x: { show: true } },
                 legend: { offsetY: 7 }
             };
             var splineAreaChart = new ApexCharts(splineAreaEl, splineAreaOptions);

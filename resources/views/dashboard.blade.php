@@ -230,7 +230,7 @@
             <div class="page-content mt-3">
                 <div class="container-fluid">
 
-                    <div class="row">
+                    <div class="row align-items-stretch">
                         <div class="col-12">
                             <div class="page-title-box d-flex align-items-center justify-content-between">
                                 <h4 class="mb-0">Dashboard</h4>
@@ -238,8 +238,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-xl-8">
+                    <div class="row align-items-stretch">
+                        <div class="col-xl-8 d-flex flex-column">
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="card">
@@ -344,10 +344,10 @@
                             </div>
 
                                
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="card">
-                                            <div class="card-body">
+                                <div class="row flex-grow-1 align-items-stretch">
+                                    <div class="col-lg-6 d-flex flex-column">
+                                        <div class="card h-100">
+                                            <div class="card-body d-flex flex-column">
 
                                                 <h4 class="card-title mb-3">Total de Projetos por Usuário</h4>
 
@@ -377,12 +377,11 @@
 
                                                 <!-- Summary columns removed: hours estimadas/gastas moved to modal only -->
 
-                                                <div id="doughnut-wrapper" style="height:320px; display:flex; align-items:center; justify-content:center; position:relative;">
-                                                    <!-- placeholder removed so chart starts visible by default -->
-                                                    <div id="doughnut-container" style="width:100%; height:100%; display:block;">
+                                                <div id="doughnut-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px; position:relative;">
+                                                    <div id="doughnut-container" style="width:100%; height:100%;">
                                                         <div id="doughnut" class="apex-charts" style="width:100%; height:100%;"></div>
-                                                            </div>
-                                                        </div>
+                                                    </div>
+                                                </div>
 
                                                         <!-- Legend for Total de Projetos por Usuário (will be populated by JS) -->
                                                         <div class="row" id="doughnut-legend">
@@ -411,9 +410,9 @@
                                     </div> <!-- end col -->
                                     
                                 
-                                    <div class="col-xl-6">
-                                        <div class="card">
-                                            <div class="card-body">
+                                    <div class="col-xl-6 d-flex flex-column">
+                                        <div class="card h-100">
+                                            <div class="card-body d-flex flex-column">
                                                 <h4 class="card-title mb-4">Relação entre quantidade de tarefas Criadas e Validadas</h4>
 
                                                 <!-- Sprint filter for Criadas x Validadas -->
@@ -444,7 +443,9 @@
 
                                               
 
-                                                <div id="spline_area" class="apex-charts" dir="ltr"></div>  
+                                                <div id="spline-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px;">
+                                                    <div id="spline_area" class="apex-charts" style="width:100%; height:100%;" dir="ltr"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -455,7 +456,7 @@
                             </div>
                         </div>
 
-                        <div class="col-xl-4">
+                        <div class="col-xl-4 d-flex flex-column">
                             <div class="card">
                                 <div class="card-body">
                                     <!-- <div class="float-right">
@@ -509,7 +510,7 @@
                                 </div>
                             </div>
 
-                            <div class="card">
+                            <div class="card flex-grow-1">
                                 <div class="card-body">
                                     <div class="dropdown float-right">
                                     </div>
