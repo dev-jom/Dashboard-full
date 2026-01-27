@@ -15,20 +15,4 @@
   margin: 0 auto;
 }
 
-/* Keep spline area responsive and centered as well */
-#spline_area {
-  width: 90% !important;
-  height: 78% !important;
-  min-height: 362px !important;
-  position: relative;
-  margin: 0 auto;
-}
 
-/* On small screens make charts full-width and reduce min-height */
-@media (max-width: 768px) {
-  #doughnut, #spline_area {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 260px !important;
-  }
-}

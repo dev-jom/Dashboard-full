@@ -443,8 +443,10 @@
 
                                               
 
-                                                <div id="spline-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px;">
-                                                    <div id="spline_area" class="apex-charts" style="width:100%; height:100%;" dir="ltr"></div>
+                                                <div id="spline-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px; position:relative;">
+                                                    <div id="spline-container" style="width:100%; height:100%;">
+                                                        <div id="spline_area" class="apex-charts" style="width:100%; height:100%;" dir="ltr"></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

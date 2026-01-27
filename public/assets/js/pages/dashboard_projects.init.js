@@ -299,7 +299,7 @@ window.addEventListener('load', function(){
       if(!labels.length){ container.innerHTML = '<div style="padding:30px;text-align:center;color:#6c757d">Sem dados para exibir</div>'; return; }
       container.innerHTML = '';
       var options = {
-        chart: { type: 'area', height: 373, toolbar: { show: false } },
+        chart: { type: 'area', height: 550, toolbar: { show: false } },
         dataLabels: { enabled: false },
         stroke: { curve: 'smooth', width: 3 },
         series: [ { name: 'Criadas', data: created }, { name: 'Validadas', data: validated } ],
