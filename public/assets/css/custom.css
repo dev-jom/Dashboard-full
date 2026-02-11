@@ -6,13 +6,19 @@
   right: 0 !important;  /* avoid forcing right alignment */
 }
 
-/* Doughnut chart sizing and centering (responsive) */
-#doughnut {
-  width: 90% !important;
-  height: 78% !important;
-  position: relative;
-  min-height: 362px !important;
-  margin: 0 auto;
+/* Responsive adjustments for filter forms on notebook screens */
+@media (min-width: 992px) and (max-width: 1400px) {
+  #dev-projects-filter-form,
+  #sprints-filter-form,
+  #top-projects-filter-form,
+  #project-status-filter-form {
+    gap: 8px; /* Add space between items */
+  }
+
+  /* Allow date inputs to shrink but not too much */
+  #dev-projects-filter-form input[type="date"],
+  #top-projects-filter-form input[type="date"],
+  #project-status-filter-form input[type="date"] {
+    min-width: 150px;
+  }
 }
-
-

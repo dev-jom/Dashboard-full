@@ -118,6 +118,19 @@ window.addEventListener('load', function(){
           labels: labels.length ? labels : ['Sem dados'],
           series: data.length ? data : [0],
           plotOptions: { pie: { donut: { size: '75%' }, customScale: 0.9 } },
+          responsive: [{
+            breakpoint: 1400,
+            options: {
+              plotOptions: {
+                pie: {
+                  customScale: 0.8,
+                  donut: {
+                    size: '70%'
+                  }
+                }
+              }
+            }
+          }],
           dataLabels: { enabled: false },
           legend: { show: false },
           colors: colors,
@@ -308,7 +321,15 @@ window.addEventListener('load', function(){
         xaxis: { categories: labels, labels: { rotate: -45 } },
         yaxis: { title: { text: 'Quantidade' } },
         legend: { position: 'top' },
-        tooltip: { shared: true, intersect: false }
+        tooltip: { shared: true, intersect: false },
+        responsive: [{
+            breakpoint: 1400,
+            options: {
+                chart: {
+                    height: 400
+                }
+            }
+        }]
       };
       if(typeof ApexCharts === 'undefined'){
         console.warn('ApexCharts not loaded');
