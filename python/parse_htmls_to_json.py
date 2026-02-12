@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 import math
 
-INPUT_DIR = '/home/jhon/projects/dashboard-Full/python/pages'  # Diretório onde estão os arquivos pagina_*.html
+INPUT_DIR = '/home/jom0_0/projects/Dashboard-full/python/pages'  # Diretório onde estão os arquivos pagina_*.html
 OUTPUT_FILE = 'tickets.json'
 
 # Sprint inference reference (ajuste se necessário)

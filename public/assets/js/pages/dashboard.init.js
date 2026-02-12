@@ -49,24 +49,10 @@ var donutOptions = {
             dataPointSelection: function(event, chartContext, config) {
                 var index = config.dataPointIndex;
                 var projectName = _topLabels[index] || '—';
-                var value = this.w.config.series[index] || _topSeries[index] || 0;
-
-                // build a simple details string (no extra details available server-side)
-                var details = 'Atividades: ' + value;
-                if (window.topProjectsPercentages && window.topProjectsPercentages[index] !== undefined) {
-                    details += ' — ' + window.topProjectsPercentages[index] + ' % do período';
+                
+                if (projectName !== '—') {
+                    showTasksModal('Tarefas do Projeto: ' + projectName, 'project', projectName);
                 }
-
-                // Atualiza o conteúdo do modal
-                document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
-                document.getElementById('modalProject').textContent = projectName;
-                document.getElementById('modalValue').textContent = value;
-                document.getElementById('modalDetails').textContent = details;
-
-                // Mostra o modal
-                var modalElement = document.getElementById('donutModal');
-                var modal = new bootstrap.Modal(modalElement);
-                modal.show();
             }
         }
     },
@@ -79,7 +65,7 @@ var donutOptions = {
     // We hide the chart's built-in legend so only the custom/HTML legend
     // (rendered below the chart in the Blade) remains visible.
     legend: { show: false },
-    colors: ["#4aa3ff", "#1cc88a", "#f6c23e", "#ff3d60", "#6c5ce7"],
+    colors: ['#4aa3ff', '#1cc88a', '#f6c23e', '#ff3d60', '#6c5ce7', '#5664d2'],
     tooltip: { y: { formatter: function(value){ return value + ' atividades'; } } }
 };
 
@@ -132,22 +118,21 @@ var radialoptions = {
         stroke: {
             lineCap: "round"
         },    
-        plotOptions: {
-            radialBar: {
-                hollow: {
-                    margin: 0,
-                    size: "70%"
-                },
-                track: {
-                    margin: 0
-                },
-                dataLabels: {
-                    show: !1
-                }
-            }
-        }
-    };
-    // create first radial and keep reference
+                    plotOptions: {
+                        radialBar: {
+                            hollow: {
+                                margin: 0,
+                                size: "70%"
+                            },
+                            track: {
+                                margin: 0
+                            },
+                            dataLabels: {
+                                show: !1
+                            }
+                        }
+                    }
+                };    // create first radial and keep reference
     try {
         var c1 = new ApexCharts(document.querySelector("#radialchart-1"), radialoptions);
         c1.render();
@@ -179,6 +164,7 @@ var radialoptions = {
                             var lbl = el1.dataset.statusLabel || '-';
                             var cnt = el1.dataset.statusCount || '0';
                             tooltip.textContent = lbl + ': ' + cnt + ' atividades';
+                            tooltip.style.backgroundColor = statusToColorMap[lbl] || statusToColorMap['default'];
                             tooltip.style.display = 'block';
                             tooltip.style.left = (ev.clientX + 12) + 'px';
                             tooltip.style.top = (ev.clientY + 12) + 'px';
@@ -259,6 +245,7 @@ var radialoptions = {
                             var lbl = el2.dataset.statusLabel || '-';
                             var cnt = el2.dataset.statusCount || '0';
                             tooltip2.textContent = lbl + ': ' + cnt + ' atividades';
+                            tooltip2.style.backgroundColor = statusToColorMap[lbl] || statusToColorMap['default'];
                             tooltip2.style.display = 'block';
                             tooltip2.style.left = (ev.clientX + 12) + 'px';
                             tooltip2.style.top = (ev.clientY + 12) + 'px';
@@ -339,6 +326,7 @@ var radialoptions = {
                             var lbl = el3.dataset.statusLabel || '-';
                             var cnt = el3.dataset.statusCount || '0';
                             tooltip3.textContent = lbl + ': ' + cnt + ' atividades';
+                            tooltip3.style.backgroundColor = statusToColorMap[lbl] || statusToColorMap['default'];
                             tooltip3.style.display = 'block';
                             tooltip3.style.left = (ev.clientX + 12) + 'px';
                             tooltip3.style.top = (ev.clientY + 12) + 'px';
@@ -360,8 +348,8 @@ var radialoptions = {
 
     // Dynamic updater: fetch top-3 statuses for selected project and update radials and labels
     (function(){
-        var colors = ["#5664d2","#4aa3ff","#eeb902"];
-        function updateRadials(labels, counts, percentages){
+                var colors = ['#4aa3ff', '#1cc88a', '#f6c23e'];
+                function updateRadials(labels, counts, percentages){
             labels = Array.isArray(labels) ? labels : [];
             counts = Array.isArray(counts) ? counts : [];
             percentages = Array.isArray(percentages) ? percentages : [];
@@ -375,7 +363,6 @@ var radialoptions = {
                 if (valueEl) valueEl.textContent = (pct === '-' ? '-' : (pct + ' %'));
                 var chart = radialCharts[i];
                 try {
-                    if (chart && typeof chart.updateOptions === 'function') chart.updateOptions({ colors: [colors[i]||'#5664d2'] });
                     if (chart && typeof chart.updateSeries === 'function') chart.updateSeries([ Math.round(pct)||0 ]);
                 } catch(e){ console.warn('updateRadials chart update', e); }
                 // store dataset for possible future use
@@ -810,7 +797,17 @@ try {
         var splineAreaEl = document.querySelector('#spline_area');
         if (splineAreaEl) {
             var splineAreaOptions = {
-                chart: { height: 500, type: 'area' },
+                chart: { 
+                    height: 500, 
+                    type: 'area',
+                    zoom: {
+                        enabled: true
+                    },
+                    toolbar: {
+                        show: true,
+                        autoSelected: 'zoom'
+                    }
+                },
                 dataLabels: { enabled: true },
                 stroke: { curve: 'smooth', width: 10 },
                 series: [
@@ -818,7 +815,7 @@ try {
                     { name: 'Criadas', data: [34, 40, 28, 52] },
                     { name: 'Validadas', data: [32, 60, 34, 46] }
                 ],
-                colors: ['#5664d2', '#1cbb8c'],
+                colors: ['#4aa3ff', '#1cc88a', '#f6c23e', '#ff3d60'],
                 xaxis: {
                     type: 'category',
                     categories: [

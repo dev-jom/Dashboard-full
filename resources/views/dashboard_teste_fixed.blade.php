@@ -154,7 +154,7 @@
                     <!-- moved Testes por Estrutura below -->
 
                     <div class="row mt-4">
-                        <div class="col-xl-6">
+                        <div class="col-xl-4">
                             <div class="card">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Status dos Testes</h4>
@@ -167,7 +167,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-6">
+                        <div class="col-xl-8">
                             <div class="card">
                                 <div class="card-body">
                                     <h4 class="card-title mb-4">Quantidade de Atividades por Dev</h4>

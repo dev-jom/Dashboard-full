@@ -9,13 +9,13 @@ import time
 
 # Configurações
 BASE_URL = "https://redmine.pbsoft.com.br/issues?c%5B%5D=project&c%5B%5D=status&c%5B%5D=cf_3&c%5B%5D=cf_1&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=estimated_hours&c%5B%5D=spent_hours&c%5B%5D=tracker&c%5B%5D=cf_19&f%5B%5D=status_id&f%5B%5D=created_on&f%5B%5D=&group_by=&op%5Bcreated_on%5D=%3E%3C&op%5Bstatus_id%5D=%2A&set_filter=1&sort=id%3Adesc&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D=&utf8=%E2%9C%93&v%5Bcreated_on%5D%5B%5D=2024-01-01&v%5Bcreated_on%5D%5B%5D=2025-12-31"
-TOTAL_PAGES = 12  # Atualize se necessário
+TOTAL_PAGES = 2  # Atualize se necessário
 OUTPUT_FILE = "tickets.json"
 
 LOGIN_URL = 'https://redmine.pbsoft.com.br/login'
 USERNAME = 'jonathas'  # coloque seu usuário
 PASSWORD = 'PClsZVnWRWOl'  # coloque sua senha
-URL_FILTRADA = 'https://redmine.pbsoft.com.br/issues?c%5B%5D=project&c%5B%5D=status&c%5B%5D=cf_3&c%5B%5D=cf_1&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=estimated_hours&c%5B%5D=spent_hours&c%5B%5D=tracker&c%5B%5D=cf_19&c%5B%5D=created_on&f%5B%5D=status_id&f%5B%5D=created_on&f%5B%5D=&group_by=&op%5Bcreated_on%5D=%3E%3C&op%5Bstatus_id%5D=%2A&per_page=500&set_filter=1&sort=id%3Adesc&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D=&utf8=%E2%9C%93&v%5Bcreated_on%5D%5B%5D=2024-01-01&v%5Bcreated_on%5D%5B%5D=2025-12-31'
+URL_FILTRADA = 'https://redmine.pbsoft.com.br/issues?c%5B%5D=project&c%5B%5D=status&c%5B%5D=cf_3&c%5B%5D=cf_1&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=estimated_hours&c%5B%5D=spent_hours&c%5B%5D=tracker&c%5B%5D=cf_19&c%5B%5D=created_on&f%5B%5D=status_id&f%5B%5D=created_on&f%5B%5D=&group_by=&op%5Bcreated_on%5D=%3E%3C&op%5Bstatus_id%5D=%2A&per_page=500&set_filter=1&sort=id%3Adesc&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D=&utf8=%E2%9C%93&v%5Bcreated_on%5D%5B%5D=2025-12-01&v%5Bcreated_on%5D%5B%5D=2026-02-13'
 
 chrome_options = Options()
 chrome_options.add_argument('--start-maximized')

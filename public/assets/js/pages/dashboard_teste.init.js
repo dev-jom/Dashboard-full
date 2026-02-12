@@ -146,7 +146,7 @@ var qntdAttDevsOptions = {
     chart: {
         type: 'bar',
         height: 482,
-        toolbar: { show: false },
+        toolbar: { show: true },
         events: {
       dataPointSelection: function(event, chartContext, config) {
         var seriesNames = qntdAttDevsOptions.series.map(function(s){ return s.name; });
@@ -236,7 +236,7 @@ function loadDevActivities() {
   // TestesPorEstrutura: cópia do exemplo de barra horizontal
 var testesPorEstruturaOptions = {
     chart: {
-        height: 800,
+        height: 1800,
         type: 'bar',
         toolbar: { show: false }
     ,
@@ -354,7 +354,7 @@ function showTestsModal(titleText, field, value) {
   var statusColors = { 'Reprovado': '#bf304a', 'Aprovado': '#4d8764', 'Validado': '#232db8' };
   var isStatus = (field === 'resultado');
   // colors for other charts
-  var fieldColors = { 'atribuido_a': '#2b15c1', 'estrutura': '#1cbb8c' };
+  var fieldColors = { 'atribuido_a': '#4aa3ff', 'estrutura': '#1cc88a' };
         items.forEach(function(t){
           var ticket = (t.numero_ticket !== null && typeof t.numero_ticket !== 'undefined') ? ('#' + String(t.numero_ticket)) : '';
           var resumo = escapeHtml(t.resumo_tarefa || '');

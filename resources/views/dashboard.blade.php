@@ -345,7 +345,7 @@
 
                                
                                 <div class="row flex-grow-1 align-items-stretch">
-                                    <div class="col-lg-6 d-flex flex-column">
+                                    <div class="col-lg-6 col-md-12 d-flex flex-column">
                                         <div class="card h-100">
                                             <div class="card-body d-flex flex-column">
 
@@ -378,7 +378,7 @@
                                                 <!-- Summary columns removed: hours estimadas/gastas moved to modal only -->
 
                                                 <div id="doughnut-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px; position:relative;">
-                                                    <div id="doughnut-container" style="width:100%; height:100%;">
+                                                    <div id="doughnut-container" style="width:100%; height:85%;">
                                                         <div id="doughnut" class="apex-charts" style="width:100%; height:100%;"></div>
                                                     </div>
                                                 </div>
@@ -410,7 +410,7 @@
                                     </div> <!-- end col -->
                                     
                                 
-                                    <div class="col-xl-6 d-flex flex-column">
+                                    <div class="col-xl-6 col-md-12 d-flex flex-column">
                                         <div class="card h-100">
                                             <div class="card-body d-flex flex-column">
                                                 <h4 class="card-title mb-4">Relação entre quantidade de tarefas Criadas e Validadas</h4>
@@ -443,11 +443,7 @@
 
                                               
 
-                                                <div id="spline-wrapper" class="flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:320px; position:relative;">
-                                                    <div id="spline-container" style="width:100%; height:100%;">
-                                                        <div id="spline_area" class="apex-charts" style="width:100%; height:100%;" dir="ltr"></div>
-                                                    </div>
-                                                </div>
+                                                <div id="spline_area" class="apex-charts" dir="ltr"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -583,6 +579,7 @@
                                     </div>
                                     <!-- Hover tooltip for status slices -->
                                     <div id="project-status-tooltip" style="position:absolute;display:none;z-index:1050;padding:8px 12px;border-radius:8px;background:#3aa0ff;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-size:13px;pointer-events:none;">-</div>
+
                                 </div>
                             </div>
                         </div>
@@ -755,6 +752,23 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tasksModal" tabindex="-1" aria-labelledby="tasksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tasksModalTitle">Detalhes da Tarefa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-center">Carregando...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
-import json
+    import json
 # Caminho do JSON gerado
-JSON_FILE = "/home/jhon/projects/dashboard-Full/python/tickets.json"
+JSON_FILE = "/home/jom0_0/projects/Dashboard-full/python/tickets.json"
 
 # Limite temporário de tickets a inserir (ajuste aqui)
 LIMIT_TICKETS = 300  # Altere para o valor desejado
@@ -21,7 +21,7 @@ DB_USER = "devmaxima_jhon"
 DB_PASS = "STC(,jPJObD(EOs*"
 
 # Pasta dos HTMLs
-HTML_DIR = "/home/jhon/projects/dashboard-Full/python/pages"
+HTML_DIR = "/home/jom0_0/projects/Dashboard-full/python/pages"
 
 def extrair_tickets(html_file):
     with open(html_file, 'r', encoding='utf-8') as f:

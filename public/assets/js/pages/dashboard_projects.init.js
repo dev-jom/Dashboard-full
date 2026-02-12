@@ -97,20 +97,11 @@ window.addEventListener('load', function(){
               dataPointSelection: function(event, chartContext, config) {
                 var idx = config && typeof config.dataPointIndex !== 'undefined' ? config.dataPointIndex : null;
                 if (idx === null) return;
-                var project = (labels && labels[idx]) ? labels[idx] : '—';
-                var value = (data && data[idx]) ? data[idx] : 0;
+                var devName = (labels && labels[idx]) ? labels[idx] : '—';
 
-                document.getElementById('modalTitle').textContent = 'Detalhes do Projeto';
-                document.getElementById('modalProject').textContent = project;
-                document.getElementById('modalValue').textContent = value;
-                var details = 'Atividades: ' + value;
-                if (window.topProjectsPercentages && window.topProjectsPercentages[idx] !== undefined) {
-                  details += ' — ' + window.topProjectsPercentages[idx] + ' % do período';
+                if (devName !== '—') {
+                  showTasksModal('Tarefas de: ' + devName, 'atribuido_a', devName);
                 }
-                document.getElementById('modalDetails').textContent = details;
-
-                var modalElement = document.getElementById('donutModal');
-                if (modalElement) { var modal = new bootstrap.Modal(modalElement); modal.show(); }
               }
             }
           },
@@ -312,7 +303,7 @@ window.addEventListener('load', function(){
       if(!labels.length){ container.innerHTML = '<div style="padding:30px;text-align:center;color:#6c757d">Sem dados para exibir</div>'; return; }
       container.innerHTML = '';
       var options = {
-        chart: { type: 'area', height: 550, toolbar: { show: false } },
+        chart: { type: 'area', height: 550, toolbar: { show: true } },
         dataLabels: { enabled: false },
         stroke: { curve: 'smooth', width: 3 },
         series: [ { name: 'Criadas', data: created }, { name: 'Validadas', data: validated } ],
@@ -320,7 +311,7 @@ window.addEventListener('load', function(){
         markers: { size: 5 },
         xaxis: { categories: labels, labels: { rotate: -45 } },
         yaxis: { title: { text: 'Quantidade' } },
-        legend: { position: 'top' },
+        legend: { position: 'bottom' },
         tooltip: { shared: true, intersect: false },
         responsive: [{
             breakpoint: 1400,
